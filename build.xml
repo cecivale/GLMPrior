@@ -1,5 +1,7 @@
 <project default="build" basedir=".">
 
+    <property environment="env"/>
+
     <!-- Source, JUnit test code and jar library locations. -->
     <property name="src" location="src"/>
     <property name="test" location="test"/>
@@ -7,10 +9,14 @@
 
     <!-- Location to check for local copy of beast2 repository -->
     <property name="local-beast-source-root" location="../beast2"/>
+    <!-- Location to check for local copy of BeastFX repository -->
+    <property name="local-beastfx-source-root" location="../BeastFX"/>
+    <!-- Location to check for local copy of BDMM-Prime repository -->
+    <property name="local-bdmmprime-source-root" location="../BDMM-Prime"/>
 
-    <!-- BEAST 2 currently uses Java 1.8 -->
-    <property name="sourceVersion" value="1.8"/>
-    <property name="targetVersion" value="1.8"/>
+    <!-- BEAST 2 currently uses Java 17 -->
+    <property name="sourceVersion" value="17"/>
+    <property name="targetVersion" value="17"/>
 
     <!-- Directories necessary for all BEAST 2 packages -->
     <property name="examples" location="examples"/>
@@ -21,15 +27,18 @@
          a Github peculiarity) -->
     <property name="beast-branch" value="master"/>
     <property name="beast-version" value="master"/>
+    <property name="beastfx-branch" value="master"/>
+    <property name="beastfx-version" value="master"/>
 
     <!-- Names of temporary build/test directories -->
     <property name="build" location="build"/>
     <property name="build-beast" location="build-beast"/>
+    <property name="build-beastfx" location="build-beastfx"/>
     <property name="beast-source-root" location="beast-source"/>
+    <property name="beastfx-source-root" location="beastfx-source"/>
     <property name="build-test" location="build-test"/>
     <property name="test-reports" location="test-reports"/>
     <property name="dist" location="dist"/>
-    <property name="jddir" location="javadoc"/>
     <property name="pack" location="${dist}/package"/>
 
     <!-- Prepare for compilation -->
@@ -45,14 +54,12 @@
 
         <!-- Read package name and version from xml file -->
         <xmlproperty file="version.xml" prefix="fromVersionFile" />
-        <property name="projName" value="${fromVersionFile.addon(name)}" />
-        <property name="projVersion" value="${fromVersionFile.addon(version)}" />
-        <property name="fullName" value="${projName}.v${projVersion}"/>
+        <property name="projName" value="${fromVersionFile.package(name)}" />
+        <property name="projVersion" value="${fromVersionFile.package(version)}" />
 
         <mkdir dir="${build}"/>
-        <mkdir dir="${build-beast}"/>
-        <mkdir dir="${beast-source-root}"/>
         <mkdir dir="${dist}"/>
+
     </target>
 
     <!-- Get beast -->
@@ -80,18 +87,33 @@
 
     <target name="get-local-beast" depends="find-beast" if="localBeastAvailable">
         <echo>Compiling against beast2 source found at ${local-beast-source-root}.</echo>
-        <!-- <property name="beast-source-root" value="${local-beast-source-root}"/> -->
+
         <copy todir="${beast-source-root}">
             <fileset dir="${local-beast-source-root}" includes="**/*.*"/>
         </copy>
     </target>
 
     <target name="build-beast" depends="get-local-beast,get-remote-beast">
+        <mkdir dir="${build-beast}"/>
         <javac
                 srcdir="${beast-source-root}/src"
                 destdir="${build-beast}"
                 source="${sourceVersion}"
                 target="${targetVersion}"
+                encoding="UTF-8"
+                includeantruntime="false"
+                fork="yes">
+            <classpath>
+                <pathelement path="${classpath}"/>
+                <fileset dir="${beast-source-root}/lib" includes="**/*.jar"/>
+            </classpath>
+        </javac>
+        <javac
+                srcdir="${beast-source-root}/test"
+                destdir="${build-beast}"
+                source="${sourceVersion}"
+                target="${targetVersion}"
+                encoding="UTF-8"
                 includeantruntime="false"
                 fork="yes">
             <classpath>
@@ -102,8 +124,76 @@
 
     </target>
 
+
+    <target name="find-beastfx" depends="init">
+        <available file="${local-beastfx-source-root}" property="localBeastFXAvailable"/>
+    </target>
+
+    <target name="get-local-beastfx" depends="find-beastfx" if="localBeastFXAvailable">
+        <echo>Compiling against BeastFX source found at ${local-beastfx-source-root}.</echo>
+
+        <copy todir="${beastfx-source-root}">
+            <fileset dir="${local-beastfx-source-root}" includes="**/*.*"/>
+        </copy>
+    </target>
+
+    <target name="get-remote-beastfx" depends="find-beastfx" unless="localBeastFXAvailable">
+        <echo>No local copy of the BeastFX source found at ${local-beastfx-source-root}.</echo>
+        <echo>Compiling against version ${beast-version} from GitHub.</echo>
+
+        <mkdir dir="beastfx-archive"/>
+
+        <get src="https://github.com/CompEvol/BeastFX/archive/refs/heads/${beastfx-branch}.zip"
+             dest="beastfx-archive/beast.zip"/>
+        <unzip src="beastfx-archive/beast.zip" dest="beastfx-archive"/>
+
+        <copy todir="${beastfx-source-root}">
+            <fileset dir="beastfx-archive/BeastFX-${beastfx-version}" includes="**/*.*"/>
+        </copy>
+
+        <delete dir="beastfx-archive"/>
+    </target>
+
+    <target name="build-beastfx" depends="get-local-beastfx,get-remote-beastfx">
+        <mkdir dir="${build-beastfx}"/>
+        <javac
+                srcdir="${beastfx-source-root}/src"
+                destdir="${build-beastfx}"
+                source="${sourceVersion}"
+                target="${targetVersion}"
+                includeantruntime="false"
+                fork="yes">
+            <classpath>
+                <pathelement path="${classpath}"/>
+                <fileset dir="${beastfx-source-root}/locallib" includes="**/*.jar"/>
+                <fileset dir="${env.JAVA_FX_HOME}" includes="**/*.jar"/>
+                <fileset dir="${beast-source-root}/lib" includes="**/*.jar"/>
+                <pathelement path="${build-beast}"/>
+            </classpath>
+        </javac>
+    </target>
+
+    <target name="install-dependencies" depends="build-beast">
+        <mkdir dir="deps"/>
+        <java fork="true" classname="beast.pkgmgmt.PackageManager">
+            <jvmarg line="-Dbeast.user.package.dir=./deps"/>
+            <arg line="-add BEASTLabs"/>
+            <classpath>
+                <pathelement path="${build-beast}"/>
+            </classpath>
+        </java>
+        <java fork="true" classname="beast.pkgmgmt.PackageManager">
+            <jvmarg line="-Dbeast.user.package.dir=./deps"/>
+            <arg line="-addRepository https://tgvaughan.github.io/BDMM-Prime/package.xml"/>
+            <arg line=" -add BDMM-Prime"/>
+            <classpath>
+                <pathelement path="${build-beast}"/>
+            </classpath>
+        </java>
+    </target>
+
     <!-- Compile -->
-    <target name="compile" depends="build-beast">
+    <target name="compile" depends="build-beast,build-beastfx,install-dependencies">
         <javac srcdir="${src}" destdir="${build}"
                source="${sourceVersion}"
                target="${targetVersion}"
@@ -111,8 +201,14 @@
                fork="yes">
             <classpath>
                 <pathelement path="${classpath}"/>
+                <fileset dir="${lib}" includes="**/*.jar" erroronmissingdir="false"/>
                 <fileset dir="${beast-source-root}/lib" includes="**/*.jar"/>
                 <pathelement path="${build-beast}"/>
+                <fileset dir="${beastfx-source-root}/locallib" includes="**/*.jar"/>
+                <pathelement path="${build-beastfx}"/>
+                <fileset dir="${env.JAVA_FX_HOME}" includes="**/*.jar"/>
+                <fileset dir="deps/BDMM-Prime" includes="**/*.jar"/>
+                <fileset dir="deps/BEASTLabs" includes="**/*.jar"/>
             </classpath>
         </javac>
     </target>
@@ -168,43 +264,6 @@
         <fail if="testFailed" status="1" message="Unit test failed."/>
     </target>
 
-    <!-- Build javadocs -->
-    <target name="javadoc" depends="init">
-        <mkdir dir="${jddir}"/>
-        <javadoc sourcepath="${src}" destdir="${jddir}">
-            <classpath>
-                <pathelement path="${classpath}"/>
-                <pathelement path="${build}" />
-                <pathelement path="${build-test}" />
-                <fileset dir="${beast-source-root}/lib" includes="**/*.jar"/>
-                <pathelement path="${build-beast}"/>
-            </classpath>
-        </javadoc>
-    </target>
-
-    <!-- Build jar-only library -->
-    <target name="build-jar" depends="compile, javadoc">
-        <property name="jardir" value="${dist}/${fullName}-jarsOnly"/>
-        <mkdir dir="${jardir}"/>
-        <jar jarfile="${jardir}/${fullName}.jar" basedir="${build}" />
-        <jar jarfile="${jardir}/${fullName}-javadoc.jar" basedir="${jddir}"/>
-        <copy todir="${jardir}" failonerror="false">
-            <fileset dir="${lib}" includes="*.jar" />
-            <fileset dir="${lib}" includes="LICENSE*" />
-        </copy>
-        <copy file="README.md" tofile="${jardir}/README" />
-        <copy file="COPYING" todir="${jardir}" />
-
-        <zip destfile="${dist}/${fullName}-jarsOnly.zip">
-            <zipfileset dir="${jardir}" prefix="${fullName}-jarsOnly" includes="**/*"/>
-        </zip>
-
-        <delete dir="${jardir}"/>
-        <echo/>
-        <echo/>
-        <echo>** Jar archive ${dist}/${fullName}-jarsOnly.zip created successfully! **</echo>
-    </target>
-
 
     <!-- Create BEAST 2 package -->
     <target name="build-package" depends="compile,copy-resources">
@@ -251,7 +310,7 @@
         <echo>** Package ${dist}/${fullName}.zip created successfuly! **</echo>
     </target>
 
-    <target name="build" depends="build-jar,build-package"/>
+    <target name="build" depends="build-package"/>
 
 
     <!-- Revert to pristine state. -->
@@ -259,10 +318,12 @@
         <delete dir="${build}" />
         <delete dir="${build-beast}" />
         <delete dir="${beast-source-root}" />
+        <delete dir="${build-beastfx}" />
+        <delete dir="${beastfx-source-root}" />
         <delete dir="${dist}" />
         <delete dir="${build-test}" />
         <delete dir="${test-reports}" />
-        <delete dir="${jddir}"/>
+        <delete dir="deps"/>
     </target>
 
 

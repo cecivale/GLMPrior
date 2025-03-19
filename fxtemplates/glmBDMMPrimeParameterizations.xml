@@ -216,7 +216,7 @@
                         and $(thisparam)ErrorsGLMCanonical.t:$(n)/estimate=true'/>
         </fragment>
 
-        <fragment id='GLMEpiBDMMPrimeParameters' spec="beastfx.app.beauti.Fragment">
+<!--        <fragment id='GLMEpiBDMMPrimeParameters' spec="beastfx.app.beauti.Fragment">
             <![CDATA[
 
             <distribution spec="bdmmprime.util.priors.ZeroExcludingPrior" id='$(thisparam)GLMEpiPrior.t:$(n)' x='@$(thisparam)GLMEpi.t:$(n)'>
@@ -285,7 +285,7 @@
 
         <fragment id="GLMEpiBDMMPrimeCoefficients" spec="beastfx.app.beauti.Fragment">
             <![CDATA[
-<!--            <param id="$(thisparam)CoefficientsGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.0" lower="0.0" estimate="false"/>-->
+&lt;!&ndash;            <param id="$(thisparam)CoefficientsGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.0" lower="0.0" estimate="false"/>&ndash;&gt;
             <distribution spec="bdmmprime.util.priors.ZeroExcludingPrior" id='$(thisparam)GLMCoefficientsEpiPrior.t:$(n)' x='@$(thisparam)CoefficientsGLMEpi.t:$(n)'>
                    <distr spec="beast.base.inference.distribution.OneOnX"/>
             </distribution>
@@ -319,7 +319,7 @@
 
         <fragment id="GLMEpiBDMMPrimeIndicators" spec="beastfx.app.beauti.Fragment">
             <![CDATA[
-<!--            <param id="$(thisparam)IndicatorsGLMEpi.t:$(n)" spec="BooleanParameter" name="indicators" value="1" estimate="false"/>-->
+&lt;!&ndash;            <param id="$(thisparam)IndicatorsGLMEpi.t:$(n)" spec="BooleanParameter" name="indicators" value="1" estimate="false"/>&ndash;&gt;
             <operator id="$(thisparam)GLMEpiIndicatorsFlip.t:$(n)" spec="BitFlipOperator" parameter="@$(thisparam)IndicatorsGLMEpi.t:$(n)" weight="3.0" uniform="false" />
             <operator id="$(thisparam)GLMEpiIndicatorSwap.t:$(n)" spec="glmprior.util.ExtendedSwapOperator" parameter="@$(thisparam)CoefficientsGLMEpi.t:$(n)" filter="@$(thisparam)IndicatorsGLMEpi.t:$(n)" weight="3.0"/>
             <operator id="$(thisparam)GLMEpiJointSwap.t:$(n)" spec="JointOperator" weight="3.0">
@@ -386,7 +386,7 @@
 
         <fragment id="GLMEpiBDMMPrimeErrors" spec="beastfx.app.beauti.Fragment">
             <![CDATA[
-<!--            <param id="$(thisparam)ErrorsGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="0.01" lower="0.0" estimate="true"/>-->
+&lt;!&ndash;            <param id="$(thisparam)ErrorsGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="0.01" lower="0.0" estimate="true"/>&ndash;&gt;
             <prior name="distribution" id='$(thisparam)GLMEpiErrorsPrior.t:$(n)' x='@$(thisparam)ErrorsGLMEpi.t:$(n)'>
                    <distr spec="beast.base.inference.distribution.Exponential" mean="0.001"/>
             </prior>
@@ -415,7 +415,7 @@
                         and inposterior(GLMEpiBDMMPrimeParameterization.t:$(n))
                         and $(thisparam)SPGLMEpi.t:$(n)/isGLM=true
                         and $(thisparam)ErrorsGLMEpi.t:$(n)/estimate=true'/>
-        </fragment>
+        </fragment>-->
 
     </mergewith>
 
@@ -517,101 +517,101 @@
         </subtemplate>
 
 
-        <!-- Epi parameterization -->
-        <subtemplate id="GLMEpiParameterization" class="glmprior.parameterization.GLMEpiParameterization"
-                     suppressInputs="glmprior.parameterization.GLMEpiParameterization.typeSet"
-                     mainid="GLMEpiBDMMPrimeParameterization.t:$(n)">
+<!--        &lt;!&ndash; Epi parameterization &ndash;&gt;-->
+<!--        <subtemplate id="GLMEpiParameterization" class="glmprior.parameterization.GLMEpiParameterization"-->
+<!--                     suppressInputs="glmprior.parameterization.GLMEpiParameterization.typeSet"-->
+<!--                     mainid="GLMEpiBDMMPrimeParameterization.t:$(n)">-->
 
-            <![CDATA[
-            <parameterization id="GLMEpiBDMMPrimeParameterization.t:$(n)"
-                              spec="glmprior.parameterization.GLMEpiParameterization">
-                        <processLength idref="originBDMMPrime.t:$(n)"/>
-                        <typeSet idref="typeSetBDMMPrime.t:$(n)"/>
-                        <Re id="ReSPGLMEpi.t:$(n)" spec="glmprior.parameterization.GLMSkylineVectorParameter" typeSet="@typeSetBDMMPrime.t:$(n)" timesAreAges="true">
-                            <processLength idref="originBDMMPrime.t:$(n)"/>
-                            <skylineValues id="ReGLMEpi.t:$(n)" spec='beast.base.inference.parameter.RealParameter' value="1.0" lower="0.0"/>
-                        </Re>
-                        <ReAmongDemes id="ReAmongDemesSPGLMEpi.t:$(n)" spec="glmprior.parameterization.GLMSkylineMatrixParameter" typeSet="@typeSetBDMMPrime.t:$(n)" timesAreAges="true">
-                            <processLength idref="originBDMMPrime.t:$(n)"/>
-                            <skylineValues id="ReAmongDemesGLMEpi.t:$(n)" spec='beast.base.inference.parameter.RealParameter' value="0.0" lower="0.0" estimate="false"/>
-                        </ReAmongDemes>
-                        <becomeUninfectiousRate id="becomeUninfectiousRateSPGLMEpi.t:$(n)" spec="glmprior.parameterization.GLMSkylineVectorParameter" typeSet="@typeSetBDMMPrime.t:$(n)" timesAreAges="true">
-                            <processLength idref="originBDMMPrime.t:$(n)"/>
-                            <skylineValues id="becomeUninfectiousRateGLMEpi.t:$(n)" spec='beast.base.inference.parameter.RealParameter' value="1.0" lower="0.0"/>
-                        </becomeUninfectiousRate>
-                        <migrationRate id="migrationRateSPGLMEpi.t:$(n)" spec="glmprior.parameterization.GLMSkylineMatrixParameter" typeSet="@typeSetBDMMPrime.t:$(n)" timesAreAges="true">
-                            <processLength idref="originBDMMPrime.t:$(n)"/>
-                            <skylineValues id="migrationRateGLMEpi.t:$(n)" spec='beast.base.inference.parameter.RealParameter' value="1.0" lower="0.0" estimate="false"/>
-                        </migrationRate>
-                        <samplingProportion id="samplingProportionSPGLMEpi.t:$(n)" spec="glmprior.parameterization.GLMSkylineVectorParameter" typeSet="@typeSetBDMMPrime.t:$(n)" timesAreAges="true">
-                            <processLength idref="originBDMMPrime.t:$(n)"/>
-                            <skylineValues id="samplingProportionGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="0.1" lower="0.0" upper="1.0"/>
-                        </samplingProportion>
-                        <removalProb id="removalProbSPGLMEpi.t:$(n)" spec="glmprior.parameterization.GLMSkylineVectorParameter" typeSet="@typeSetBDMMPrime.t:$(n)" timesAreAges="true">
-                            <processLength idref="originBDMMPrime.t:$(n)"/>
-                            <skylineValues id="removalProbGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.0" lower="0.0" upper="1.0" estimate="false"/>
-                        </removalProb>
+<!--            <![CDATA[-->
+<!--            <parameterization id="GLMEpiBDMMPrimeParameterization.t:$(n)"-->
+<!--                              spec="glmprior.parameterization.GLMEpiParameterization">-->
+<!--                        <processLength idref="originBDMMPrime.t:$(n)"/>-->
+<!--                        <typeSet idref="typeSetBDMMPrime.t:$(n)"/>-->
+<!--                        <Re id="ReSPGLMEpi.t:$(n)" spec="glmprior.parameterization.GLMSkylineVectorParameter" typeSet="@typeSetBDMMPrime.t:$(n)" timesAreAges="true">-->
+<!--                            <processLength idref="originBDMMPrime.t:$(n)"/>-->
+<!--                            <skylineValues id="ReGLMEpi.t:$(n)" spec='beast.base.inference.parameter.RealParameter' value="1.0" lower="0.0"/>-->
+<!--                        </Re>-->
+<!--                        <ReAmongDemes id="ReAmongDemesSPGLMEpi.t:$(n)" spec="glmprior.parameterization.GLMSkylineMatrixParameter" typeSet="@typeSetBDMMPrime.t:$(n)" timesAreAges="true">-->
+<!--                            <processLength idref="originBDMMPrime.t:$(n)"/>-->
+<!--                            <skylineValues id="ReAmongDemesGLMEpi.t:$(n)" spec='beast.base.inference.parameter.RealParameter' value="0.0" lower="0.0" estimate="false"/>-->
+<!--                        </ReAmongDemes>-->
+<!--                        <becomeUninfectiousRate id="becomeUninfectiousRateSPGLMEpi.t:$(n)" spec="glmprior.parameterization.GLMSkylineVectorParameter" typeSet="@typeSetBDMMPrime.t:$(n)" timesAreAges="true">-->
+<!--                            <processLength idref="originBDMMPrime.t:$(n)"/>-->
+<!--                            <skylineValues id="becomeUninfectiousRateGLMEpi.t:$(n)" spec='beast.base.inference.parameter.RealParameter' value="1.0" lower="0.0"/>-->
+<!--                        </becomeUninfectiousRate>-->
+<!--                        <migrationRate id="migrationRateSPGLMEpi.t:$(n)" spec="glmprior.parameterization.GLMSkylineMatrixParameter" typeSet="@typeSetBDMMPrime.t:$(n)" timesAreAges="true">-->
+<!--                            <processLength idref="originBDMMPrime.t:$(n)"/>-->
+<!--                            <skylineValues id="migrationRateGLMEpi.t:$(n)" spec='beast.base.inference.parameter.RealParameter' value="1.0" lower="0.0" estimate="false"/>-->
+<!--                        </migrationRate>-->
+<!--                        <samplingProportion id="samplingProportionSPGLMEpi.t:$(n)" spec="glmprior.parameterization.GLMSkylineVectorParameter" typeSet="@typeSetBDMMPrime.t:$(n)" timesAreAges="true">-->
+<!--                            <processLength idref="originBDMMPrime.t:$(n)"/>-->
+<!--                            <skylineValues id="samplingProportionGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="0.1" lower="0.0" upper="1.0"/>-->
+<!--                        </samplingProportion>-->
+<!--                        <removalProb id="removalProbSPGLMEpi.t:$(n)" spec="glmprior.parameterization.GLMSkylineVectorParameter" typeSet="@typeSetBDMMPrime.t:$(n)" timesAreAges="true">-->
+<!--                            <processLength idref="originBDMMPrime.t:$(n)"/>-->
+<!--                            <skylineValues id="removalProbGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.0" lower="0.0" upper="1.0" estimate="false"/>-->
+<!--                        </removalProb>-->
 
-                        <rhoSampling id="rhoSamplingProbSPGLMEpi.t:$(n)" spec="glmprior.parameterization.GLMTimedParameter" typeSet="@typeSetBDMMPrime.t:$(n)" timesAreAges="true">
-                            <processLength idref="originBDMMPrime.t:$(n)"/>
-                        </rhoSampling>
-            </parameterization>
+<!--                        <rhoSampling id="rhoSamplingProbSPGLMEpi.t:$(n)" spec="glmprior.parameterization.GLMTimedParameter" typeSet="@typeSetBDMMPrime.t:$(n)" timesAreAges="true">-->
+<!--                            <processLength idref="originBDMMPrime.t:$(n)"/>-->
+<!--                        </rhoSampling>-->
+<!--            </parameterization>-->
 
-            <param id="ReChangeTimesGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.0" lower="0.0" estimate="false"/>
-            <param id="ReAmongDemesChangeTimesGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.0" lower="0.0" estimate="false"/>
-            <param id="becomeUninfectiousRateChangeTimesGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.0" lower="0.0" estimate="false"/>
-            <param id="migrationRateChangeTimesGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.0" lower="0.0" estimate="false"/>
-            <param id="samplingProportionChangeTimesGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.0" lower="0.0" estimate="false"/>
-            <param id="removalProbChangeTimesGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.0" lower="0.0" estimate="false"/>
+<!--            <param id="ReChangeTimesGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.0" lower="0.0" estimate="false"/>-->
+<!--            <param id="ReAmongDemesChangeTimesGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.0" lower="0.0" estimate="false"/>-->
+<!--            <param id="becomeUninfectiousRateChangeTimesGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.0" lower="0.0" estimate="false"/>-->
+<!--            <param id="migrationRateChangeTimesGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.0" lower="0.0" estimate="false"/>-->
+<!--            <param id="samplingProportionChangeTimesGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.0" lower="0.0" estimate="false"/>-->
+<!--            <param id="removalProbChangeTimesGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.0" lower="0.0" estimate="false"/>-->
 
-            <param id="ReIndicatorsGLMEpi.t:$(n)" spec="BooleanParameter" name="indicators" value="1" dimension="2" estimate="true"/>
-            <param id="ReCoefficientsGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.0" lower="0.0" dimension="2" estimate="false"/>
-            <param id="ReErrorsGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="0.01" lower="0.0" dimension="2" estimate="false"/>
+<!--            <param id="ReIndicatorsGLMEpi.t:$(n)" spec="BooleanParameter" name="indicators" value="1" dimension="2" estimate="true"/>-->
+<!--            <param id="ReCoefficientsGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.0" lower="0.0" dimension="2" estimate="false"/>-->
+<!--            <param id="ReErrorsGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="0.01" lower="0.0" dimension="2" estimate="false"/>-->
 
-            <param id="ReAmongDemesIndicatorsGLMEpi.t:$(n)" spec="BooleanParameter" name="indicators" value="1" dimension="2" estimate="true"/>
-            <param id="ReAmongDemesCoefficientsGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.0" lower="0.0" dimension="2" estimate="false"/>
-            <param id="ReAmongDemesErrorsGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="0.01" lower="0.0" dimension="2" estimate="false"/>
+<!--            <param id="ReAmongDemesIndicatorsGLMEpi.t:$(n)" spec="BooleanParameter" name="indicators" value="1" dimension="2" estimate="true"/>-->
+<!--            <param id="ReAmongDemesCoefficientsGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.0" lower="0.0" dimension="2" estimate="false"/>-->
+<!--            <param id="ReAmongDemesErrorsGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="0.01" lower="0.0" dimension="2" estimate="false"/>-->
 
-            <param id="becomeUninfectiousRateIndicatorsGLMEpi.t:$(n)" spec="BooleanParameter" name="indicators" value="1" dimension="2" estimate="true"/>
-            <param id="becomeUninfectiousRateCoefficientsGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.0" lower="0.0" dimension="2" estimate="false"/>
-            <param id="becomeUninfectiousRateErrorsGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="0.01" lower="0.0" dimension="2" estimate="false"/>
+<!--            <param id="becomeUninfectiousRateIndicatorsGLMEpi.t:$(n)" spec="BooleanParameter" name="indicators" value="1" dimension="2" estimate="true"/>-->
+<!--            <param id="becomeUninfectiousRateCoefficientsGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.0" lower="0.0" dimension="2" estimate="false"/>-->
+<!--            <param id="becomeUninfectiousRateErrorsGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="0.01" lower="0.0" dimension="2" estimate="false"/>-->
 
-            <param id="migrationRateIndicatorsGLMEpi.t:$(n)" spec="BooleanParameter" name="indicators" value="1" dimension="2" estimate="true"/>
-            <param id="migrationRateCoefficientsGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.0" lower="0.0" dimension="2" estimate="false"/>
-            <param id="migrationRateErrorsGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="0.01" lower="0.0" dimension="2" estimate="false"/>
+<!--            <param id="migrationRateIndicatorsGLMEpi.t:$(n)" spec="BooleanParameter" name="indicators" value="1" dimension="2" estimate="true"/>-->
+<!--            <param id="migrationRateCoefficientsGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.0" lower="0.0" dimension="2" estimate="false"/>-->
+<!--            <param id="migrationRateErrorsGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="0.01" lower="0.0" dimension="2" estimate="false"/>-->
 
-            <param id="samplingProportionIndicatorsGLMEpi.t:$(n)" spec="BooleanParameter" name="indicators" value="1" dimension="2" estimate="true"/>
-            <param id="samplingProportionCoefficientsGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.0" lower="0.0" dimension="2" estimate="false"/>
-            <param id="samplingProportionErrorsGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="0.01" lower="0.0" dimension="2" estimate="false"/>
+<!--            <param id="samplingProportionIndicatorsGLMEpi.t:$(n)" spec="BooleanParameter" name="indicators" value="1" dimension="2" estimate="true"/>-->
+<!--            <param id="samplingProportionCoefficientsGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.0" lower="0.0" dimension="2" estimate="false"/>-->
+<!--            <param id="samplingProportionErrorsGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="0.01" lower="0.0" dimension="2" estimate="false"/>-->
 
-            <param id="removalProbIndicatorsGLMEpi.t:$(n)" spec="BooleanParameter" name="indicators" value="1" dimension="2" estimate="true"/>
-            <param id="removalProbCoefficientsGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.0" lower="0.0" dimension="2" estimate="false"/>
-            <param id="removalProbErrorsGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="0.01" lower="0.0" dimension="2" estimate="false"/>
-
-
-            <param id="rhoSamplingProbGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="0.0" estimate="false"/>
-            <param id="rhoSamplingProbTimesGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="0.0" estimate="false"/>
-
-            <param id="rhoSamplingProbIndicatorsGLMEpi.t:$(n)" spec="BooleanParameter" name="indicators" value="1" dimension="2" estimate="true"/>
-            <param id="rhoSamplingProbCoefficientsGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.0"  lower="0.0" dimension="2" estimate="false"/>
-            <param id="rhoSamplingProbErrorsGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="0.01" lower="0.0" dimension="2" estimate="false"/>
-]]>
+<!--            <param id="removalProbIndicatorsGLMEpi.t:$(n)" spec="BooleanParameter" name="indicators" value="1" dimension="2" estimate="true"/>-->
+<!--            <param id="removalProbCoefficientsGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.0" lower="0.0" dimension="2" estimate="false"/>-->
+<!--            <param id="removalProbErrorsGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="0.01" lower="0.0" dimension="2" estimate="false"/>-->
 
 
-            <plate fragment="GLMEpiBDMMPrimeParameters" var="thisparam"
-                   range="Re,ReAmongDemes,becomeUninfectiousRate,migrationRate,samplingProportion,removalProb,rhoSamplingProb"/>
-            <plate fragment="GLMEpiBDMMPrimeParameters" var="thisparam"
-                   range="ReChangeTimes,ReAmongDemesChangeTimes,becomeUninfectiousRateChangeTimes,migrationRateChangeTimes,samplingProportionChangeTimes,removalProbChangeTimes,rhoSamplingProbTimes"/>
-            <plate fragment="GLMEpiBDMMPrimeSkylineLoggers" var="thisparam"
-                   range="Re,ReAmongDemes,becomeUninfectiousRate,migrationRate,samplingProportion,removalProb,rhoSamplingProb"/>
-            <plate fragment="GLMEpiBDMMPrimeCoefficients" var="thisparam"
-                   range="Re,ReAmongDemes,becomeUninfectiousRate,migrationRate,samplingProportion,removalProb,rhoSamplingProb"/>
-            <plate fragment="GLMEpiBDMMPrimeIndicators" var="thisparam"
-                   range="Re,ReAmongDemes,becomeUninfectiousRate,migrationRate,samplingProportion,removalProb,rhoSamplingProb"/>
-            <plate fragment="GLMEpiBDMMPrimeErrors" var="thisparam"
-                   range="Re,ReAmongDemes,becomeUninfectiousRate,migrationRate,samplingProportion,removalProb,rhoSamplingProb"/>
+<!--            <param id="rhoSamplingProbGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="0.0" estimate="false"/>-->
+<!--            <param id="rhoSamplingProbTimesGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="0.0" estimate="false"/>-->
 
-        </subtemplate>
+<!--            <param id="rhoSamplingProbIndicatorsGLMEpi.t:$(n)" spec="BooleanParameter" name="indicators" value="1" dimension="2" estimate="true"/>-->
+<!--            <param id="rhoSamplingProbCoefficientsGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.0"  lower="0.0" dimension="2" estimate="false"/>-->
+<!--            <param id="rhoSamplingProbErrorsGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="0.01" lower="0.0" dimension="2" estimate="false"/>-->
+<!--]]>-->
+
+
+<!--            <plate fragment="GLMEpiBDMMPrimeParameters" var="thisparam"-->
+<!--                   range="Re,ReAmongDemes,becomeUninfectiousRate,migrationRate,samplingProportion,removalProb,rhoSamplingProb"/>-->
+<!--            <plate fragment="GLMEpiBDMMPrimeParameters" var="thisparam"-->
+<!--                   range="ReChangeTimes,ReAmongDemesChangeTimes,becomeUninfectiousRateChangeTimes,migrationRateChangeTimes,samplingProportionChangeTimes,removalProbChangeTimes,rhoSamplingProbTimes"/>-->
+<!--            <plate fragment="GLMEpiBDMMPrimeSkylineLoggers" var="thisparam"-->
+<!--                   range="Re,ReAmongDemes,becomeUninfectiousRate,migrationRate,samplingProportion,removalProb,rhoSamplingProb"/>-->
+<!--            <plate fragment="GLMEpiBDMMPrimeCoefficients" var="thisparam"-->
+<!--                   range="Re,ReAmongDemes,becomeUninfectiousRate,migrationRate,samplingProportion,removalProb,rhoSamplingProb"/>-->
+<!--            <plate fragment="GLMEpiBDMMPrimeIndicators" var="thisparam"-->
+<!--                   range="Re,ReAmongDemes,becomeUninfectiousRate,migrationRate,samplingProportion,removalProb,rhoSamplingProb"/>-->
+<!--            <plate fragment="GLMEpiBDMMPrimeErrors" var="thisparam"-->
+<!--                   range="Re,ReAmongDemes,becomeUninfectiousRate,migrationRate,samplingProportion,removalProb,rhoSamplingProb"/>-->
+
+<!--        </subtemplate>-->
      </mergewith>
 
 </beast>
