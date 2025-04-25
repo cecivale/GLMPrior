@@ -1,4 +1,4 @@
-package glmprior.util;
+package glmprior.operator;
 
 import beast.base.core.Description;
 import beast.base.core.Input;

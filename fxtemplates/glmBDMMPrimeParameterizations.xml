@@ -120,10 +120,10 @@
             <![CDATA[
 <!--            <param id="$(thisparam)IndicatorsGLMCanonical.t:$(n)" spec="BooleanParameter" name="indicators" value="1" estimate="false"/>-->
             <operator id="$(thisparam)GLMCanonicalIndicatorsFlip.t:$(n)" spec="BitFlipOperator" parameter="@$(thisparam)IndicatorsGLMCanonical.t:$(n)" weight="3.0" uniform="false" />
-            <operator id="$(thisparam)GLMCanonicalIndicatorSwap.t:$(n)" spec="glmprior.util.ExtendedSwapOperator" parameter="@$(thisparam)CoefficientsGLMCanonical.t:$(n)" filter="@$(thisparam)IndicatorsGLMCanonical.t:$(n)" weight="3.0"/>
+            <operator id="$(thisparam)GLMCanonicalIndicatorSwap.t:$(n)" spec="glmprior.operator.ExtendedSwapOperator" parameter="@$(thisparam)CoefficientsGLMCanonical.t:$(n)" filter="@$(thisparam)IndicatorsGLMCanonical.t:$(n)" weight="3.0"/>
             <operator id="$(thisparam)GLMCanonicalJointSwap.t:$(n)" spec="JointOperator" weight="3.0">
-                <operator id="$(thisparam)GLMCanonicalJointCoefficientSwap.t:$(n)" spec="glmprior.util.ExtendedSwapOperator" boolparameter="@$(thisparam)IndicatorsGLMCanonical.t:$(n)" weight="5.0" />
-                <operator id="$(thisparam)GLMCanonicalJointIndicatorSwap.t:$(n)" spec="glmprior.util.ExtendedSwapOperator" parameter="@$(thisparam)CoefficientsGLMCanonical.t:$(n)" weight="5.0"/>
+                <operator id="$(thisparam)GLMCanonicalJointCoefficientSwap.t:$(n)" spec="glmprior.operator.ExtendedSwapOperator" boolparameter="@$(thisparam)IndicatorsGLMCanonical.t:$(n)" weight="5.0" />
+                <operator id="$(thisparam)GLMCanonicalJointIndicatorSwap.t:$(n)" spec="glmprior.operator.ExtendedSwapOperator" parameter="@$(thisparam)CoefficientsGLMCanonical.t:$(n)" weight="5.0"/>
             </operator>
 ]]>
 
@@ -321,10 +321,10 @@
             <![CDATA[
 &lt;!&ndash;            <param id="$(thisparam)IndicatorsGLMEpi.t:$(n)" spec="BooleanParameter" name="indicators" value="1" estimate="false"/>&ndash;&gt;
             <operator id="$(thisparam)GLMEpiIndicatorsFlip.t:$(n)" spec="BitFlipOperator" parameter="@$(thisparam)IndicatorsGLMEpi.t:$(n)" weight="3.0" uniform="false" />
-            <operator id="$(thisparam)GLMEpiIndicatorSwap.t:$(n)" spec="glmprior.util.ExtendedSwapOperator" parameter="@$(thisparam)CoefficientsGLMEpi.t:$(n)" filter="@$(thisparam)IndicatorsGLMEpi.t:$(n)" weight="3.0"/>
+            <operator id="$(thisparam)GLMEpiIndicatorSwap.t:$(n)" spec="glmprior.operator.ExtendedSwapOperator" parameter="@$(thisparam)CoefficientsGLMEpi.t:$(n)" filter="@$(thisparam)IndicatorsGLMEpi.t:$(n)" weight="3.0"/>
             <operator id="$(thisparam)GLMEpiJointSwap.t:$(n)" spec="JointOperator" weight="3.0">
-                <operator id="$(thisparam)GLMEpiJointCoefficientSwap.t:$(n)" spec="glmprior.util.ExtendedSwapOperator" boolparameter="@$(thisparam)IndicatorsGLMEpi.t:$(n)" weight="5.0" />
-                <operator id="$(thisparam)GLMEpiJointIndicatorSwap.t:$(n)" spec="glmprior.util.ExtendedSwapOperator" parameter="@$(thisparam)CoefficientsGLMEpi.t:$(n)" weight="5.0"/>
+                <operator id="$(thisparam)GLMEpiJointCoefficientSwap.t:$(n)" spec="glmprior.operator.ExtendedSwapOperator" boolparameter="@$(thisparam)IndicatorsGLMEpi.t:$(n)" weight="5.0" />
+                <operator id="$(thisparam)GLMEpiJointIndicatorSwap.t:$(n)" spec="glmprior.operator.ExtendedSwapOperator" parameter="@$(thisparam)CoefficientsGLMEpi.t:$(n)" weight="5.0"/>
             </operator>
 ]]>
 

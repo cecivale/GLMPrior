@@ -6,7 +6,11 @@
     <service type="beast.base.core.BEASTInterface">
         <provider classname="glmprior.util.GLMLogLinear"/>
         <provider classname="glmprior.util.GLMPrior"/>
-        <provider classname="glmprior.util.ExtendedSwapOperator"/>
+        <provider classname="glmprior.operator.ExtendedSwapOperator"/>
+        <provider classname="glmprior.operator.RealRandomWalkOperator"/>
+        <provider classname="glmprior.operator.BitFlipBSSVSOperator"/>
+        <provider classname="glmprior.operator.PickIndicatorOperator"/>
+        <provider classname="glmprior.operator.MultiSwapOperator"/>
         <provider classname="glmprior.parameterization.GLMSkylineVectorParameter"/>
         <provider classname="glmprior.parameterization.GLMSkylineMatrixParameter"/>
         <provider classname="glmprior.parameterization.GLMTimedParameter"/>
