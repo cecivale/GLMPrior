@@ -4,7 +4,7 @@
     <depends on="BDMM-Prime" atleast="2.2.2"/>
 
     <service type="beast.base.core.BEASTInterface">
-        <provider classname="glmprior.util.GLMLogLinear"/>
+        <provider classname="glmprior.util.GLMPrior"/>
         <provider classname="glmprior.util.GLMPrior"/>
         <provider classname="glmprior.operator.ExtendedSwapOperator"/>
         <provider classname="glmprior.operator.RealRandomWalkOperator"/>

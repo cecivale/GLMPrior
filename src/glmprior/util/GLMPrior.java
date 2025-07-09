@@ -2,12 +2,15 @@ package glmprior.util;
 
 import beast.base.core.Description;
 import beast.base.core.Input;
+import beast.base.core.Loggable;
 import beast.base.inference.CalculationNode;
 import beast.base.core.Function;
 import beast.base.inference.parameter.BooleanParameter;
 import beast.base.inference.parameter.RealParameter;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -19,7 +22,7 @@ import java.util.List;
                 + "coefficients, indicator variables for predictor selection, and optionally "
                 + "a global scale factor and error terms. Predictors are log transform and scale by default."
 )
-public class GLMPrior extends CalculationNode implements Function {
+public class GLMPrior extends CalculationNode implements Function, Loggable {
 
     public Input<String> linkFunctionInput = new Input<>("linkFunction",
             "Link function to use: log, logit, or identity. Default is log.",
@@ -71,18 +74,15 @@ public class GLMPrior extends CalculationNode implements Function {
                 if (baselineValue.getValue() <= 0) {
                     throw new IllegalArgumentException("Baseline value must be positive for log link.");
                 }
-                intercept = Math.log(baselineValue.getValue());
                 break;
 
             case "logit":
                 if (baselineValue.getValue() <= 0 || baselineValue.getValue() >= 1) {
                     throw new IllegalArgumentException("Baseline probability must be in (0,1) for logit link.");
                 }
-                intercept = Math.log(baselineValue.getValue() / (1 - baselineValue.getValue())); // logit transform
                 break;
 
             case "identity":
-                intercept = baselineValue.getValue();  // no transform
                 break;
 
             default:
@@ -164,7 +164,7 @@ public class GLMPrior extends CalculationNode implements Function {
     @Override
     public double getArrayValue(int i) {
 
-        double linearPredictor = intercept;
+        double linearPredictor = 0;
         for (int j = 0; j < coefficients.getDimension(); j++) {
             if (indicators.getArrayValue(j) > 0.0) {
                 linearPredictor += coefficients.getArrayValue(j) * predictors.get(j).getArrayValue(i);
@@ -177,16 +177,105 @@ public class GLMPrior extends CalculationNode implements Function {
 
         switch (link) {
             case "log":
+                intercept = Math.log(baselineValue.getValue());
+                linearPredictor += intercept;
                 return Math.exp(linearPredictor);
 
             case "logit":
+                intercept = Math.log(baselineValue.getValue() / (1 - baselineValue.getValue())); // logit transform
+                linearPredictor += intercept;
                 return 1.0 / (1.0 + Math.exp(-linearPredictor));
 
             case "identity":
+                intercept = baselineValue.getValue();
+                linearPredictor += intercept;
                 return linearPredictor;
 
             default:
                 throw new IllegalArgumentException("Unknown link function: " + link);
         }
     }
+
+    /*
+     * Loggable implementation
+     */
+    @Override
+    public void init(PrintStream out) {
+
+        // baseline
+        out.print(getID() + "_baseline\t");
+
+//        // coefficients all
+//        for (int i = 0; i < coefficients.getDimension(); i++) {
+//            out.print(getID() + "_coefficient." + i + "\t");
+//        }
+
+        // coefficients filtered by indicators (only those with indicator == 1)
+        for (int i = 0; i < coefficients.getDimension(); i++) {
+            out.print(getID() + "_coefficientON." + i + "\t");
+        }
+
+        // indicators
+        for (int i = 0; i < indicators.getDimension(); i++) {
+            out.print(getID() + "_indicator." + i + "\t");
+        }
+
+        // error terms if defined
+        if (error != null) {
+            for (int i = 0; i < error.getDimension(); i++) {
+                out.print(getID() + "_error." + i + "\t");
+            }
+        }
+
+        // Optionally, you can add the final GLM values for each dimension
+        for (int i = 0; i < getDimension(); i++) {
+            out.print(getID() + "_value." + i+ "\t");
+//            if (i < getDimension() - 1) {
+//                out.print("\t");
+//            }
+        }
+    }
+
+    @Override
+    public void log(long sample, PrintStream out) {
+
+        // baseline (intercept)
+        out.print(baselineValue.getValue() + "\t");
+//
+//        // all coefficients
+//        for (int i = 0; i < coefficients.getDimension(); i++) {
+//            out.print(coefficients.getArrayValue(i) + "\t");
+//        }
+
+        // coefficients where indicators == 1, 0 otherwise
+        for (int i = 0; i < coefficients.getDimension(); i++) {
+            double coefSelected = (indicators.getArrayValue(i) > 0.0) ? coefficients.getArrayValue(i) : 0.0;
+            out.print(coefSelected + "\t");
+        }
+
+        // indicators
+        for (int i = 0; i < indicators.getDimension(); i++) {
+            out.print(indicators.getArrayValue(i) + "\t");
+        }
+
+        // error terms (if present)
+        if (error != null) {
+            for (int i = 0; i < error.getDimension(); i++) {
+                out.print(error.getArrayValue(i) + "\t");
+            }
+        }
+
+        // GLM values for each dimension (predicted values)
+        for (int i = 0; i < getDimension(); i++) {
+            out.print(getArrayValue(i)+ "\t");
+//            if (i < getDimension() - 1) {
+//                out.print("\t");
+//            }
+        }
+    }
+
+    @Override
+    public void close(PrintStream out) {
+    }
+
 }

@@ -16,7 +16,7 @@ public class GLMLogLinearTest {
         Function ind = new BooleanParameter("1 1");
         Function scale = new RealParameter("2.0");
 
-        GLMLogLinear glm = new GLMLogLinear();
+        GLMPrior glm = new GLMPrior();
         glm.initByName(
                 "predictor", pred1,
                 "predictor", pred2,
@@ -43,7 +43,7 @@ public class GLMLogLinearTest {
         Function ind = new BooleanParameter("0 0");
         Function scale = new RealParameter("2.0");
 
-        GLMLogLinear glm = new GLMLogLinear();
+        GLMPrior glm = new GLMPrior();
         glm.initByName(
                 "predictor", pred1,
                 "predictor", pred2,
@@ -71,7 +71,7 @@ public class GLMLogLinearTest {
         Function scale = new RealParameter("2.0");
         Function err = new RealParameter("0.1 0.2");
 
-        GLMLogLinear glm = new GLMLogLinear();
+        GLMPrior glm = new GLMPrior();
         glm.initByName(
                 "predictor", pred1,
                 "predictor", pred2,
@@ -99,7 +99,7 @@ public class GLMLogLinearTest {
         Function ind = new BooleanParameter("1 1");
         Function scale = new RealParameter("2.0");
 
-        GLMLogLinear glm = new GLMLogLinear();
+        GLMPrior glm = new GLMPrior();
         glm.initByName(
                 "predictor", pred1,
                 "predictor", pred2,

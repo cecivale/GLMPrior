@@ -19,7 +19,6 @@ package glmprior.parameterization;
 
 import bdmmprime.parameterization.SkylineVectorParameter;
 import beast.base.core.Input;
-import glmprior.util.GLMLogLinear;
 
 public class GLMSkylineVectorParameter extends SkylineVectorParameter {
 

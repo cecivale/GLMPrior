@@ -5,7 +5,6 @@ import bdmmprime.distribution.BirthDeathMigrationDistribution;
 import bdmmprime.parameterization.SkylineParameter;
 import beast.base.core.BEASTInterface;
 import beast.base.core.Input;
-import beast.base.core.Log;
 import beast.base.evolution.tree.TraitSet;
 import beast.base.evolution.tree.Tree;
 import beast.base.inference.parameter.BooleanParameter;
@@ -13,7 +12,7 @@ import beast.base.inference.parameter.RealParameter;
 import beastfx.app.inputeditor.BeautiDoc;
 import beastfx.app.inputeditor.InputEditor;
 import beastfx.app.util.FXUtils;
-import glmprior.util.GLMLogLinear;
+import glmprior.util.GLMPrior;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -151,11 +150,11 @@ public abstract class GLMSkylineInputEditor extends InputEditor.Base {
         glmValuesTableBoxCol.getChildren().add(estimateIndicatorsCheckBox);
         glmValuesTableBoxCol.getChildren().add(estimateErrorCheckBox);
 
-        estimateIndicatorsCheckBox.setSelected(isGLM && ((GLMLogLinear) skylineParameter.skylineValuesInput.get()).indicatorsInput.get() != null &&
-                ((GLMLogLinear) skylineParameter.skylineValuesInput.get()).indicatorsInput.get().isEstimatedInput.get());
-        estimateErrorCheckBox.setSelected(isGLM && ((GLMLogLinear) skylineParameter.skylineValuesInput.get()).errorInput.get() != null &&
-                ((GLMLogLinear) skylineParameter.skylineValuesInput.get()).errorInput.get().isEstimatedInput.get());
-        if (isGLM && !((GLMLogLinear) skylineParameter.skylineValuesInput.get()).predictorsInput.get().isEmpty()) {
+        estimateIndicatorsCheckBox.setSelected(isGLM && ((GLMPrior) skylineParameter.skylineValuesInput.get()).indicatorsInput.get() != null &&
+                ((GLMPrior) skylineParameter.skylineValuesInput.get()).indicatorsInput.get().isEstimatedInput.get());
+        estimateErrorCheckBox.setSelected(isGLM && ((GLMPrior) skylineParameter.skylineValuesInput.get()).errorInput.get() != null &&
+                ((GLMPrior) skylineParameter.skylineValuesInput.get()).errorInput.get().isEstimatedInput.get());
+        if (isGLM && !((GLMPrior) skylineParameter.skylineValuesInput.get()).predictorsInput.get().isEmpty()) {
             showTableButton.setManaged(true);
             showTableButton.setVisible(true);
         } else {
@@ -216,8 +215,8 @@ public abstract class GLMSkylineInputEditor extends InputEditor.Base {
 
         if ((skylineParameter.skylineValuesInput.get() instanceof RealParameter &&
                 (skylineParameter.skylineValuesInput.get()).getDimension() == (nChanges + 1)) ||
-                (skylineParameter.skylineValuesInput.get() instanceof GLMLogLinear &&
-                        ((GLMLogLinear) skylineParameter.skylineValuesInput.get()).predictorsInput.get().get(0).getDimension() == (nChanges + 1))) {
+                (skylineParameter.skylineValuesInput.get() instanceof GLMPrior &&
+                        ((GLMPrior) skylineParameter.skylineValuesInput.get()).predictorsInput.get().get(0).getDimension() == (nChanges + 1))) {
             if (nTypes > 1) {
                 scalarRatesCheckBox.setSelected(true);
                 scalarRatesCheckBox.disableProperty().set(false);
@@ -298,8 +297,8 @@ public abstract class GLMSkylineInputEditor extends InputEditor.Base {
                 }
                 updateValuesUI();
             } else {
-                if (!(skylineParameter.skylineValuesInput.get() instanceof GLMLogLinear)) {
-                    GLMLogLinear glmValue = new GLMLogLinear();
+                if (!(skylineParameter.skylineValuesInput.get() instanceof GLMPrior)) {
+                    GLMPrior glmValue = new GLMPrior();
                     glmValue.setID(getGLMValuesParameterID());
                     skylineParameter.skylineValuesInput.setValue(glmValue, skylineParameter);
                 }
@@ -321,11 +320,11 @@ public abstract class GLMSkylineInputEditor extends InputEditor.Base {
                 return;
             }
 
-            GLMLogLinear glmValue;
-            if (skylineParameter.skylineValuesInput.get() instanceof GLMLogLinear) {
-                glmValue = (GLMLogLinear) skylineParameter.skylineValuesInput.get();
+            GLMPrior glmValue;
+            if (skylineParameter.skylineValuesInput.get() instanceof GLMPrior) {
+                glmValue = (GLMPrior) skylineParameter.skylineValuesInput.get();
             } else {
-                glmValue = new GLMLogLinear();
+                glmValue = new GLMPrior();
             }
 
             glmValue.setID(getGLMValuesParameterID());
@@ -396,14 +395,14 @@ public abstract class GLMSkylineInputEditor extends InputEditor.Base {
         });
 
         estimateIndicatorsCheckBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
-            GLMLogLinear glmValue = (GLMLogLinear) skylineParameter.skylineValuesInput.get();
+            GLMPrior glmValue = (GLMPrior) skylineParameter.skylineValuesInput.get();
             BooleanParameter indicators = glmValue.indicatorsInput.get();
             indicators.isEstimatedInput.setValue(newValue, indicators);
             sync();
         });
 
         estimateErrorCheckBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
-            GLMLogLinear glmValue = (GLMLogLinear) skylineParameter.skylineValuesInput.get();
+            GLMPrior glmValue = (GLMPrior) skylineParameter.skylineValuesInput.get();
             RealParameter error = glmValue.errorInput.get();
             if (error == null && newValue){
                 if (!doc.pluginmap.containsKey(getGLMErrorParameterID())) {
@@ -500,8 +499,8 @@ public abstract class GLMSkylineInputEditor extends InputEditor.Base {
                 }
                 updateValuesUI();
             } else {
-                if (!(skylineParameter.skylineValuesInput.get() instanceof GLMLogLinear)) {
-                    GLMLogLinear glmValue = new GLMLogLinear();
+                if (!(skylineParameter.skylineValuesInput.get() instanceof GLMPrior)) {
+                    GLMPrior glmValue = new GLMPrior();
                     glmValue.setID(getGLMValuesParameterID());
                     skylineParameter.skylineValuesInput.setValue(glmValue, skylineParameter);
                 }
