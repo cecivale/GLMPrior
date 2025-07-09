@@ -22,8 +22,9 @@ public class GLMLogLinearTest {
                 "predictor", pred2,
                 "coefficients", coeff,
                 "indicators", ind,
-                "scaleFactor", scale,
-                "transform", false);
+                "baselineValue", scale,
+                "logTransform", false,
+                "standardize", false);
 
         for (int i = 0; i < glm.getDimension(); i++)
             System.out.print(glm.getArrayValue(i) + " ");
@@ -48,8 +49,9 @@ public class GLMLogLinearTest {
                 "predictor", pred2,
                 "coefficients", coeff,
                 "indicators", ind,
-                "scaleFactor", scale,
-                "transform", false);
+                "baselineValue", scale,
+                "logTransform", false,
+                "standardize", false);
 
         for (int i = 0; i < glm.getDimension(); i++)
             System.out.print(glm.getArrayValue(i) + " ");
@@ -75,9 +77,10 @@ public class GLMLogLinearTest {
                 "predictor", pred2,
                 "coefficients", coeff,
                 "indicators", ind,
-                "scaleFactor", scale,
+                "baselineValue", scale,
                 "error", err,
-                "transform", false);
+                "logTransform", false,
+                "standardize", false);
 
         for (int i = 0; i < glm.getDimension(); i++)
             System.out.print(glm.getArrayValue(i) + " ");
@@ -102,8 +105,9 @@ public class GLMLogLinearTest {
                 "predictor", pred2,
                 "coefficients", coeff,
                 "indicators", ind,
-                "scaleFactor", scale,
-                "transform", true);
+                "baselineValue", scale,
+                "logTransform", true,
+                "standardize", true);
 
         for (int i = 0; i < glm.getDimension(); i++)
             System.out.print(glm.getArrayValue(i) + " ");

@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-//# TODO set dimension of indicators and coefficients automatically
 /**
  * @author Cecilia Valenzuela Agui
  */
@@ -32,22 +31,25 @@ public class GLMLogLinear extends CalculationNode implements Function {
     public Input<BooleanParameter> indicatorsInput = new Input<>("indicators",
             "Indicators for predictor inclusion/exclusion in GLM.", Input.Validate.REQUIRED);
 
-    public Input<RealParameter> scaleFactorInput = new Input<>("scaleFactor",
-            "Scale factor.", new RealParameter("1.0"), Input.Validate.OPTIONAL);
+    public Input<RealParameter> baselineValueInput = new Input<>("baselineValue",
+            "GLM intercept, baseline value of the parameter when all coefficients or indicators are 0.", new RealParameter("1.0"), Input.Validate.OPTIONAL);
 
     public Input<RealParameter> errorInput = new Input<>("error",
             "Error terms.", Input.Validate.OPTIONAL);
 
-    public Input<Boolean> transformInput = new Input<>("transform",
-            "Boolean value to log transform and scale predictors. Default true.", false,
+    public Input<Boolean> logTransformInput = new Input<>("logTransform",
+            "Whether to log-transform the predictors using log(x + 1). Default false.", false,
             Input.Validate.OPTIONAL);
 
+    public Input<Boolean> standardizeInput = new Input<>("standardize",
+            "Whether to standardize predictors (mean 0, sd 1) after transformation. Default false.", false,
+            Input.Validate.OPTIONAL);
     public  Input<List<Function>>  predictorsTInput = new Input<>("predictorT",
             "Predictor transformed, internal to the class",
             new ArrayList<>(), Input.Validate.OPTIONAL);
 
     List<Function> predictors;
-    RealParameter coefficients, scaleFactor, error;
+    RealParameter coefficients, baselineValue, error;
     BooleanParameter indicators;
     int parameterSize, predictorN;
 
@@ -55,11 +57,11 @@ public class GLMLogLinear extends CalculationNode implements Function {
     public void initAndValidate() {
         coefficients = coefficientsInput.get();
         indicators = indicatorsInput.get();
-        scaleFactor = scaleFactorInput.get();
+        baselineValue = baselineValueInput.get();
         predictors = predictorsInput.get();
 
-        predictorN = predictorsInput.get().size();
-        parameterSize = predictorsInput.get().get(0).getDimension();
+        predictorN = predictors.size();
+        parameterSize = predictors.get(0).getDimension();
         for (Function pred : predictors)
             if (parameterSize != pred.getDimension())
                 throw new IllegalArgumentException("GLM Predictors do not have the same dimension " +
@@ -68,12 +70,11 @@ public class GLMLogLinear extends CalculationNode implements Function {
         coefficients.setDimension(predictorN);
         indicators.setDimension(predictorN);
 
-        if (scaleFactor.getDimension() != 1)
+        if (baselineValue.getDimension() != 1)
             throw new IllegalArgumentException("Dimension of GLM scale factor should be 1.");
 
-        for (int i = 0; i < indicators.getDimension(); i++) {
-            if (!(indicators.getArrayValue(i) != 0 || indicators.getArrayValue(i) != 1))
-                throw new IllegalArgumentException("GLM indicators incorrect value, it should be 0 or 1.");
+        if (baselineValue.getArrayValue() <= 0.0) {
+            throw new IllegalArgumentException("Baseline value must be positive.");
         }
 
         if (errorInput.get() != null) {
@@ -87,33 +88,47 @@ public class GLMLogLinear extends CalculationNode implements Function {
                         + "of elements.");
         }
 
-        if (transformInput.get()) {
+        if (logTransformInput.get() || standardizeInput.get()) {
             Double[] predT;
+            List<Function> transformedPredictors = new ArrayList<>();
             double pred, mean, sd;
+
             for (int j = 0; j < predictorN; j++) {
                 predT = new Double[parameterSize];
                 mean = 0;
                 sd = 0;
+
                 for (int i = 0; i < parameterSize; i++) {
-                    pred = predictorsInput.get().get(j).getArrayValue(i);
-                    if (pred < 0.0)
-                        throw new IllegalArgumentException("Predictor should not be smaller than 0 to be log transformed.");
-                    predT[i] = Math.log(pred + 1);
-                    mean += predT[i];
+                    pred = predictors.get(j).getArrayValue(i);
+                    if (logTransformInput.get()) {
+                        if (pred < 0.0)
+                            throw new IllegalArgumentException("Predictor should not be smaller than 0 to be log transformed.");
+                        pred = Math.log(pred + 1);
+                    }
+                    predT[i] = pred;
+                    mean += pred;
                 }
-                mean /= parameterSize;
-                for (int i = 0; i < parameterSize; i++) {
-                    sd += (predT[i] - mean) * (predT[i] - mean);
+
+                if (standardizeInput.get()) {
+                    mean /= parameterSize;
+                    for (int i = 0; i < parameterSize; i++) {
+                        sd += (predT[i] - mean) * (predT[i] - mean);
+                    }
+                    sd = Math.sqrt(sd / parameterSize);
+                    if (sd == 0.0) {
+                        throw new IllegalArgumentException("Standard deviation of predictor " + j + " is zero, cannot standardize.");
+                    }
+                    for (int i = 0; i < parameterSize; i++) {
+                        predT[i] = (predT[i] - mean) / sd;
+                    }
                 }
-                sd = Math.sqrt(sd / (parameterSize));
-                for (int i = 0; i < parameterSize; i++) {
-                    predT[i] = (predT[i] - mean) / sd;
-                }
-                Function fpredT = new RealParameter(predT);
-                predictorsTInput.setValue(fpredT, this);
+
+                transformedPredictors.add(new RealParameter(predT));
             }
+            predictorsTInput.setValue(transformedPredictors, this);
             predictors = predictorsTInput.get();
         }
+
     }
 
     @Override
@@ -133,6 +148,6 @@ public class GLMLogLinear extends CalculationNode implements Function {
         if (error != null)
             lograte += error.getArrayValue(i % error.getDimension());
 
-        return scaleFactor.getArrayValue() * Math.exp(lograte);
+        return baselineValue.getArrayValue() * Math.exp(lograte);
     }
 }
