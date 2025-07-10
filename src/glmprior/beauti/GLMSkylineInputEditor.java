@@ -143,17 +143,25 @@ public abstract class GLMSkylineInputEditor extends InputEditor.Base {
 
         CheckBox estimateIndicatorsCheckBox = new CheckBox("Estimate indicators");
         CheckBox estimateErrorCheckBox = new CheckBox("Estimate error");
+        CheckBox logTransformPredictorsCheckBox = new CheckBox("Log-transform predictors");
+        CheckBox standardizePredictorsCheckBox = new CheckBox("Standardize predictors");
         VBox glmValuesTableBoxCol = FXUtils.newVBox();
         glmValuesTableBoxCol.getChildren().add(loadButton);
         glmValuesTableBoxCol.getChildren().add(showTableButton);
 //        glmValuesTableBoxCol.getChildren().add(glmValuesTable);
         glmValuesTableBoxCol.getChildren().add(estimateIndicatorsCheckBox);
         glmValuesTableBoxCol.getChildren().add(estimateErrorCheckBox);
+        glmValuesTableBoxCol.getChildren().add(logTransformPredictorsCheckBox);
+        glmValuesTableBoxCol.getChildren().add(standardizePredictorsCheckBox);
 
         estimateIndicatorsCheckBox.setSelected(isGLM && ((GLMPrior) skylineParameter.skylineValuesInput.get()).indicatorsInput.get() != null &&
                 ((GLMPrior) skylineParameter.skylineValuesInput.get()).indicatorsInput.get().isEstimatedInput.get());
         estimateErrorCheckBox.setSelected(isGLM && ((GLMPrior) skylineParameter.skylineValuesInput.get()).errorInput.get() != null &&
                 ((GLMPrior) skylineParameter.skylineValuesInput.get()).errorInput.get().isEstimatedInput.get());
+        logTransformPredictorsCheckBox.setSelected(isGLM && ((GLMPrior) skylineParameter.skylineValuesInput.get()).logTransformInput.get() != null &&
+                ((GLMPrior) skylineParameter.skylineValuesInput.get()).logTransformInput.get());
+        standardizePredictorsCheckBox.setSelected(isGLM && ((GLMPrior) skylineParameter.skylineValuesInput.get()).standardizeInput.get() != null &&
+                ((GLMPrior) skylineParameter.skylineValuesInput.get()).standardizeInput.get());
         if (isGLM && !((GLMPrior) skylineParameter.skylineValuesInput.get()).predictorsInput.get().isEmpty()) {
             showTableButton.setManaged(true);
             showTableButton.setVisible(true);
@@ -415,9 +423,29 @@ public abstract class GLMSkylineInputEditor extends InputEditor.Base {
                 }
                 glmValue.errorInput.setValue(error, glmValue);
             }
-
+            glmValue.initAndValidate();
             sync();
         });
+
+
+        logTransformPredictorsCheckBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            GLMPrior glmValue = (GLMPrior) skylineParameter.skylineValuesInput.get();
+//            Boolean logTransform = glmValue.logTransformInput.get();
+            glmValue.logTransformInput.setValue(newValue, glmValue);
+            glmValue.initAndValidate();
+//            System.out.println(glmValue);
+            sync();
+        });
+
+        standardizePredictorsCheckBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            GLMPrior glmValue = (GLMPrior) skylineParameter.skylineValuesInput.get();
+//            BooleanParameter indicators = glmValue.indicatorsInput.get();
+            glmValue.standardizeInput.setValue(newValue, glmValue);
+            glmValue.initAndValidate();
+//            System.out.println(glmValue);
+            sync();
+        });
+
 
         timesAreRelativeCheckBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
             skylineParameter.timesAreRelativeInput.setValue(newValue, skylineParameter);

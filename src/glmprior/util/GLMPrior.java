@@ -102,16 +102,6 @@ public class GLMPrior extends CalculationNode implements Function, Loggable {
             throw new IllegalArgumentException("Dimension of GLM scale factor should be 1.");
 
 
-        if (errorInput.get() != null) {
-            error = errorInput.get();
-            if (error.getDimension() == 1) {
-               error.setDimension(parameterSize);
-            }
-
-            if (parameterSize % error.getDimension() != 0)
-                throw new IllegalArgumentException("GLM error term has an incorrect number "
-                        + "of elements.");
-        }
 
         if (logTransformInput.get() || standardizeInput.get()) {
             Double[] predT;
@@ -153,6 +143,18 @@ public class GLMPrior extends CalculationNode implements Function, Loggable {
 
             predictors = transformedPredictors;
         }
+
+        if (errorInput.get() != null) {
+            error = errorInput.get();
+            if (error.getDimension() == 1) {
+                error.setDimension(parameterSize);
+            }
+
+            if (parameterSize % error.getDimension() != 0)
+                throw new IllegalArgumentException("GLM error term has an incorrect number "
+                        + "of elements.");
+        }
+
 
     }
 
