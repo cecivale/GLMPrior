@@ -5,12 +5,12 @@ import beast.base.core.Input;
 import beast.base.core.Loggable;
 import beast.base.inference.CalculationNode;
 import beast.base.core.Function;
+import beast.base.core.BEASTObject;
 import beast.base.inference.parameter.BooleanParameter;
 import beast.base.inference.parameter.RealParameter;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 
@@ -196,6 +196,12 @@ public class GLMPrior extends CalculationNode implements Function, Loggable {
         }
     }
 
+    private String getPredictorID(Input<List<Function>> p, int i) {
+        Function predictor = p.get().get(i);
+        String predID = ((BEASTObject) predictor).getID();
+        return (predID == null || predID.equals(predictor.getClass().getSimpleName())) ? String.valueOf(i + 1) : predID;
+    }
+
     /*
      * Loggable implementation
      */
@@ -209,30 +215,26 @@ public class GLMPrior extends CalculationNode implements Function, Loggable {
 //        for (int i = 0; i < coefficients.getDimension(); i++) {
 //            out.print(getID() + "_coefficient." + i + "\t");
 //        }
-
         // coefficients filtered by indicators (only those with indicator == 1)
         for (int i = 0; i < coefficients.getDimension(); i++) {
-            out.print(getID() + "_coefficientON." + i + "\t");
+            out.print(getID() + "_coefficientON." + getPredictorID(predictorsInput, i) + "\t");
         }
 
         // indicators
         for (int i = 0; i < indicators.getDimension(); i++) {
-            out.print(getID() + "_indicator." + i + "\t");
+            out.print(getID() + "_indicator." + getPredictorID(predictorsInput, i) + "\t");
         }
 
         // error terms if defined
         if (error != null) {
             for (int i = 0; i < error.getDimension(); i++) {
-                out.print(getID() + "_error." + i + "\t");
+                out.print(getID() + "_error." + String.valueOf(i + 1) + "\t");
             }
         }
 
-        // Optionally, you can add the final GLM values for each dimension
+        // GLM values for each dimension
         for (int i = 0; i < getDimension(); i++) {
-            out.print(getID() + "_value." + i+ "\t");
-//            if (i < getDimension() - 1) {
-//                out.print("\t");
-//            }
+            out.print(getID() + "_value." + String.valueOf(i + 1) + "\t");
         }
     }
 
@@ -268,9 +270,7 @@ public class GLMPrior extends CalculationNode implements Function, Loggable {
         // GLM values for each dimension (predicted values)
         for (int i = 0; i < getDimension(); i++) {
             out.print(getArrayValue(i)+ "\t");
-//            if (i < getDimension() - 1) {
-//                out.print("\t");
-//            }
+
         }
     }
 
