@@ -30,6 +30,7 @@ Where:
 
 Download the ZIP from the [GLMPrior GitHub releases](https://github.com/cecivale/GLMPrior/releases), then unzip and install following the instructions in [BEAST2 Package Management](https://www.beast2.org/managing-packages/) — see the **Install by hand** section.  
 
+Currently, to use the BEAUTi interface of GLMPrior with BDMM-Prime, you need to manually move the file `glmBDMMPrimeParameterizations.xml` from the `GLMPrior/fxtemplates` folder to the `BDMM-Prime/fxtemplates` folder.
 
 ## Setup Instructions in BEAUTi (only for BDMM-Prime )
 

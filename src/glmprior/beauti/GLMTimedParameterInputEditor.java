@@ -330,6 +330,21 @@ public class GLMTimedParameterInputEditor extends InputEditor.Base {
             coefficients.setDimension(glmValue.predictorsInput.get().size());
             coefficients.isEstimatedInput.setValue(true, coefficients);
             sanitiseRealParameter(coefficients);
+
+            RealParameter baselineValue = glmValue.baselineValueInput.get();
+            if (baselineValue == null) {
+                if (!doc.pluginmap.containsKey(getGLMBaselineParameterID())) {
+                    baselineValue = new RealParameter("1.0");
+                    baselineValue.setID(getGLMBaselineParameterID());
+                } else {
+                    baselineValue = (RealParameter) doc.pluginmap.get(getGLMBaselineParameterID());
+                }
+                glmValue.baselineValueInput.setValue(baselineValue, glmValue);
+            }
+            baselineValue.setDimension(glmValue.baselineValueInput.get().getDimension());
+            baselineValue.isEstimatedInput.setValue(true, baselineValue);
+            sanitiseRealParameter(baselineValue);
+
             BooleanParameter indicators = glmValue.indicatorsInput.get();
             if (indicators == null) {
                 if (!doc.pluginmap.containsKey(getGLMIndicatorParameterID())) {
@@ -713,6 +728,13 @@ public class GLMTimedParameterInputEditor extends InputEditor.Base {
         return prefix + "Coefficients" + suffix;
     }
 
+    String getGLMBaselineParameterID() {
+        int idx = timedParameter.getID().indexOf("SP");
+        String prefix = timedParameter.getID().substring(0, idx);
+        String suffix = timedParameter.getID().substring(idx + 2);
+
+        return prefix + "Baseline" + suffix;
+    }
     String getGLMIndicatorParameterID() {
         int idx = timedParameter.getID().indexOf("SP");
         String prefix = timedParameter.getID().substring(0, idx);

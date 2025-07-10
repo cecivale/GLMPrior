@@ -38,7 +38,8 @@ public class GLMPrior extends CalculationNode implements Function, Loggable {
             "Indicators for predictor inclusion/exclusion in GLM.", Input.Validate.REQUIRED);
 
     public Input<RealParameter> baselineValueInput = new Input<>("baselineValue",
-            "GLM intercept, baseline value of the parameter when all coefficients or indicators are 0.", new RealParameter("1.0"), Input.Validate.REQUIRED);
+            "GLM intercept, baseline value of the parameter when all coefficients or indicators are 0.",
+             Input.Validate.REQUIRED);
 
     public Input<RealParameter> errorInput = new Input<>("error",
             "Error terms.", Input.Validate.OPTIONAL);

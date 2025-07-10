@@ -356,6 +356,21 @@ public abstract class GLMSkylineInputEditor extends InputEditor.Base {
             coefficients.setDimension(glmValue.predictorsInput.get().size());
             coefficients.isEstimatedInput.setValue(true, coefficients);
             sanitiseRealParameter(coefficients);
+
+            RealParameter baselineValue = glmValue.baselineValueInput.get();
+            if (baselineValue == null) {
+                if (!doc.pluginmap.containsKey(getGLMBaselineParameterID())) {
+                    baselineValue = new RealParameter("1.0");
+                    baselineValue.setID(getGLMBaselineParameterID());
+                } else {
+                    baselineValue = (RealParameter) doc.pluginmap.get(getGLMBaselineParameterID());
+                }
+                glmValue.baselineValueInput.setValue(baselineValue, glmValue);
+            }
+            baselineValue.setDimension(1);
+            baselineValue.isEstimatedInput.setValue(true, baselineValue);
+            sanitiseRealParameter(baselineValue);
+
             BooleanParameter indicators = glmValue.indicatorsInput.get();
             if (indicators == null){
                 if (!doc.pluginmap.containsKey(getGLMIndicatorParameterID())) {
@@ -743,6 +758,14 @@ public abstract class GLMSkylineInputEditor extends InputEditor.Base {
         String suffix = skylineParameter.getID().substring(idx + 2);
 
         return prefix + "Coefficients" + suffix;
+    }
+
+    String getGLMBaselineParameterID() {
+        int idx = skylineParameter.getID().indexOf("SP");
+        String prefix = skylineParameter.getID().substring(0, idx);
+        String suffix = skylineParameter.getID().substring(idx + 2);
+
+        return prefix + "Baseline" + suffix;
     }
 
     String getGLMIndicatorParameterID() {
