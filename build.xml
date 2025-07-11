@@ -185,7 +185,7 @@
         <java fork="true" classname="beast.pkgmgmt.PackageManager">
             <jvmarg line="-Dbeast.user.package.dir=./deps"/>
             <arg line="-addRepository https://tgvaughan.github.io/BDMM-Prime/package.xml"/>
-            <arg line=" -add BDMM-Prime"/>
+            <arg line="-add BDMM-Prime"/>
             <classpath>
                 <pathelement path="${build-beast}"/>
             </classpath>
