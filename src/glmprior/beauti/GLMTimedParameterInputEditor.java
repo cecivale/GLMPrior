@@ -9,7 +9,7 @@ import beastfx.app.inputeditor.BeautiDoc;
 import beastfx.app.inputeditor.InputEditor;
 import beastfx.app.util.FXUtils;
 import glmprior.parameterization.GLMTimedParameter;
-import glmprior.util.GLMLogLinear;
+import glmprior.util.GLMPrior;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValueBase;
@@ -129,9 +129,9 @@ public class GLMTimedParameterInputEditor extends InputEditor.Base {
         glmValuesTableBoxCol.getChildren().add(estimateIndicatorsCheckBox);
         glmValuesTableBoxCol.getChildren().add(estimateErrorCheckBox);
 
-        estimateIndicatorsCheckBox.setSelected(isGLM && ((GLMLogLinear) timedParameter.valuesInput.get()).indicatorsInput.get().isEstimatedInput.get());
-        estimateErrorCheckBox.setSelected(isGLM && ((GLMLogLinear) timedParameter.valuesInput.get()).errorInput.get().isEstimatedInput.get());
-        if (isGLM && !((GLMLogLinear) timedParameter.valuesInput.get()).predictorsInput.get().isEmpty()) {
+        estimateIndicatorsCheckBox.setSelected(isGLM && ((GLMPrior) timedParameter.valuesInput.get()).indicatorsInput.get().isEstimatedInput.get());
+        estimateErrorCheckBox.setSelected(isGLM && ((GLMPrior) timedParameter.valuesInput.get()).errorInput.get().isEstimatedInput.get());
+        if (isGLM && !((GLMPrior) timedParameter.valuesInput.get()).predictorsInput.get().isEmpty()) {
             showTableButton.setManaged(true);
             showTableButton.setVisible(true);
         } else {
@@ -186,7 +186,7 @@ public class GLMTimedParameterInputEditor extends InputEditor.Base {
 
         if (timeCount > 0) {
             updateTimesUI(timesEntryRow);
-            if (!isGLM && !(timedParameter.valuesInput.get() instanceof GLMLogLinear))
+            if (!isGLM && !(timedParameter.valuesInput.get() instanceof GLMPrior))
                 updateValuesUI();
             else
                 updateGLMUI();
@@ -302,11 +302,11 @@ public class GLMTimedParameterInputEditor extends InputEditor.Base {
                 return;
             }
 
-            GLMLogLinear glmValue;
-            if (timedParameter.valuesInput.get() instanceof GLMLogLinear) {
-                glmValue = (GLMLogLinear) timedParameter.valuesInput.get();
+            GLMPrior glmValue;
+            if (timedParameter.valuesInput.get() instanceof GLMPrior) {
+                glmValue = (GLMPrior) timedParameter.valuesInput.get();
             } else {
-                glmValue = new GLMLogLinear();
+                glmValue = new GLMPrior();
             }
 
             glmValue.setID(getTimesParameterID());
@@ -330,6 +330,21 @@ public class GLMTimedParameterInputEditor extends InputEditor.Base {
             coefficients.setDimension(glmValue.predictorsInput.get().size());
             coefficients.isEstimatedInput.setValue(true, coefficients);
             sanitiseRealParameter(coefficients);
+
+            RealParameter baselineValue = glmValue.baselineValueInput.get();
+            if (baselineValue == null) {
+                if (!doc.pluginmap.containsKey(getGLMBaselineParameterID())) {
+                    baselineValue = new RealParameter("1.0");
+                    baselineValue.setID(getGLMBaselineParameterID());
+                } else {
+                    baselineValue = (RealParameter) doc.pluginmap.get(getGLMBaselineParameterID());
+                }
+                glmValue.baselineValueInput.setValue(baselineValue, glmValue);
+            }
+            baselineValue.setDimension(glmValue.baselineValueInput.get().getDimension());
+            baselineValue.isEstimatedInput.setValue(true, baselineValue);
+            sanitiseRealParameter(baselineValue);
+
             BooleanParameter indicators = glmValue.indicatorsInput.get();
             if (indicators == null) {
                 if (!doc.pluginmap.containsKey(getGLMIndicatorParameterID())) {
@@ -414,8 +429,8 @@ public class GLMTimedParameterInputEditor extends InputEditor.Base {
                 }
                 updateValuesUI();
             } else {
-                if (!(timedParameter.valuesInput.get() instanceof GLMLogLinear)) {
-                    GLMLogLinear glmTimesValue = new GLMLogLinear();
+                if (!(timedParameter.valuesInput.get() instanceof GLMPrior)) {
+                    GLMPrior glmTimesValue = new GLMPrior();
                     glmTimesValue.setID(getGLMValuesParameterID());
                     timedParameter.valuesInput.setValue(glmTimesValue, timedParameter);
                 }
@@ -510,7 +525,7 @@ public class GLMTimedParameterInputEditor extends InputEditor.Base {
     }
 
     void updateGLMUI() {
-        GLMLogLinear valuesParameter = (GLMLogLinear) timedParameter.valuesInput.get();
+        GLMPrior valuesParameter = (GLMPrior) timedParameter.valuesInput.get();
         int nTimes = timedParameter.getTimeCount();
         int nTypes = timedParameter.typeSetInput.get().getNTypes();
         int nPredictors = valuesParameter.predictorsInput.get().size();
@@ -581,14 +596,14 @@ public class GLMTimedParameterInputEditor extends InputEditor.Base {
 
         System.out.println("Number of epochs: " + nEpochs);
 
-        boolean isParamGLM = timedParameter.valuesInput.get() instanceof GLMLogLinear;
+        boolean isParamGLM = timedParameter.valuesInput.get() instanceof GLMPrior;
 
 
 
         if (nEpochs > 0) {
 
             if (isParamGLM) {
-                for (Function p : (((GLMLogLinear) timedParameter.valuesInput.get()).predictorsInput.get())) {
+                for (Function p : (((GLMPrior) timedParameter.valuesInput.get()).predictorsInput.get())) {
                     // TODO actually maybe should just put an error if dimensions of table are wrong
                     if (scalar)
                         ((RealParameter) p).setDimension(nEpochs); // TODO check, put a warning and then change
@@ -596,8 +611,8 @@ public class GLMTimedParameterInputEditor extends InputEditor.Base {
                         ((RealParameter) p).setDimension(nTypes * nEpochs); // TODO check, put a warning and then change
                     sanitiseRealParameter(((RealParameter) p));
                 }
-                if (!((GLMLogLinear) timedParameter.valuesInput.get()).predictorsInput.get().isEmpty())
-                    ((GLMLogLinear) timedParameter.valuesInput.get()).initAndValidate();
+                if (!((GLMPrior) timedParameter.valuesInput.get()).predictorsInput.get().isEmpty())
+                    ((GLMPrior) timedParameter.valuesInput.get()).initAndValidate();
 
             } else {
                 RealParameter valuesParam = getValuesParam();
@@ -713,6 +728,13 @@ public class GLMTimedParameterInputEditor extends InputEditor.Base {
         return prefix + "Coefficients" + suffix;
     }
 
+    String getGLMBaselineParameterID() {
+        int idx = timedParameter.getID().indexOf("SP");
+        String prefix = timedParameter.getID().substring(0, idx);
+        String suffix = timedParameter.getID().substring(idx + 2);
+
+        return prefix + "Baseline" + suffix;
+    }
     String getGLMIndicatorParameterID() {
         int idx = timedParameter.getID().indexOf("SP");
         String prefix = timedParameter.getID().substring(0, idx);
