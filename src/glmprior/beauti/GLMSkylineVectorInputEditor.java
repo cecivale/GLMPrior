@@ -6,7 +6,7 @@ import beast.base.core.Input;
 import beast.base.inference.parameter.RealParameter;
 import beastfx.app.inputeditor.BeautiDoc;
 import glmprior.parameterization.GLMSkylineVectorParameter;
-import glmprior.util.GLMLogLinear;
+import glmprior.util.GLMPrior;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValueBase;
@@ -66,10 +66,10 @@ public class GLMSkylineVectorInputEditor extends GLMSkylineInputEditor {
                 ? 1
                 : skylineParameter.changeTimesInput.get().getDimension() + 1;
         // TODO here is an error when going back and forth between GLM and normal param
-        boolean b = skylineParameter.skylineValuesInput.get() instanceof GLMLogLinear;
+        boolean b = skylineParameter.skylineValuesInput.get() instanceof GLMPrior;
 
         if (b) {
-            for (Function p : (((GLMLogLinear) skylineParameter.skylineValuesInput.get()).predictorsInput.get())) {
+            for (Function p : (((GLMPrior) skylineParameter.skylineValuesInput.get()).predictorsInput.get())) {
                 // TODO actually maybe should just put an error if dimensions of table are wrong
                 if (skylineParameter.isScalarInput.get())
                     ((RealParameter) p).setDimension(nEpochs); // TODO check, put a warning and then change
@@ -77,8 +77,8 @@ public class GLMSkylineVectorInputEditor extends GLMSkylineInputEditor {
                     ((RealParameter) p).setDimension(nTypes * nEpochs); // TODO check, put a warning and then change
                 sanitiseRealParameter(((RealParameter) p));
             }
-            if (!((GLMLogLinear) skylineParameter.skylineValuesInput.get()).predictorsInput.get().isEmpty())
-                ((GLMLogLinear) skylineParameter.skylineValuesInput.get()).initAndValidate();
+            if (!((GLMPrior) skylineParameter.skylineValuesInput.get()).predictorsInput.get().isEmpty())
+                ((GLMPrior) skylineParameter.skylineValuesInput.get()).initAndValidate();
 
         } else {
 
@@ -111,7 +111,7 @@ public class GLMSkylineVectorInputEditor extends GLMSkylineInputEditor {
 
 
     void updateGLMUI() {
-        GLMLogLinear valuesParameter = (GLMLogLinear) skylineVector.skylineValuesInput.get();
+        GLMPrior valuesParameter = (GLMPrior) skylineVector.skylineValuesInput.get();
         int nChanges = skylineVector.changeTimesInput.get().getDimension();
         if ( skylineVector.changeTimesInput.get() ==null){
             return;

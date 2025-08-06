@@ -16,14 +16,15 @@ public class GLMLogLinearTest {
         Function ind = new BooleanParameter("1 1");
         Function scale = new RealParameter("2.0");
 
-        GLMLogLinear glm = new GLMLogLinear();
+        GLMPrior glm = new GLMPrior();
         glm.initByName(
                 "predictor", pred1,
                 "predictor", pred2,
                 "coefficients", coeff,
                 "indicators", ind,
-                "scaleFactor", scale,
-                "transform", false);
+                "baselineValue", scale,
+                "logTransform", false,
+                "standardize", false);
 
         for (int i = 0; i < glm.getDimension(); i++)
             System.out.print(glm.getArrayValue(i) + " ");
@@ -42,14 +43,15 @@ public class GLMLogLinearTest {
         Function ind = new BooleanParameter("0 0");
         Function scale = new RealParameter("2.0");
 
-        GLMLogLinear glm = new GLMLogLinear();
+        GLMPrior glm = new GLMPrior();
         glm.initByName(
                 "predictor", pred1,
                 "predictor", pred2,
                 "coefficients", coeff,
                 "indicators", ind,
-                "scaleFactor", scale,
-                "transform", false);
+                "baselineValue", scale,
+                "logTransform", false,
+                "standardize", false);
 
         for (int i = 0; i < glm.getDimension(); i++)
             System.out.print(glm.getArrayValue(i) + " ");
@@ -69,15 +71,16 @@ public class GLMLogLinearTest {
         Function scale = new RealParameter("2.0");
         Function err = new RealParameter("0.1 0.2");
 
-        GLMLogLinear glm = new GLMLogLinear();
+        GLMPrior glm = new GLMPrior();
         glm.initByName(
                 "predictor", pred1,
                 "predictor", pred2,
                 "coefficients", coeff,
                 "indicators", ind,
-                "scaleFactor", scale,
+                "baselineValue", scale,
                 "error", err,
-                "transform", false);
+                "logTransform", false,
+                "standardize", false);
 
         for (int i = 0; i < glm.getDimension(); i++)
             System.out.print(glm.getArrayValue(i) + " ");
@@ -96,14 +99,15 @@ public class GLMLogLinearTest {
         Function ind = new BooleanParameter("1 1");
         Function scale = new RealParameter("2.0");
 
-        GLMLogLinear glm = new GLMLogLinear();
+        GLMPrior glm = new GLMPrior();
         glm.initByName(
                 "predictor", pred1,
                 "predictor", pred2,
                 "coefficients", coeff,
                 "indicators", ind,
-                "scaleFactor", scale,
-                "transform", true);
+                "baselineValue", scale,
+                "logTransform", true,
+                "standardize", true);
 
         for (int i = 0; i < glm.getDimension(); i++)
             System.out.print(glm.getArrayValue(i) + " ");
