@@ -52,6 +52,10 @@ public class GLMPrior extends CalculationNode implements Function, Loggable {
             "Whether to standardize predictors (mean 0, sd 1) after transformation. Default false.", false,
             Input.Validate.OPTIONAL);
 
+    public Input<Boolean> logValuesInput = new Input<>("logValues",
+            "Whether to log the values of calculated output or only parameters of this class. Default false.", false,
+            Input.Validate.OPTIONAL);
+
     String link;
     List<Function> predictors;
     RealParameter coefficients, baselineValue, error;
@@ -235,9 +239,11 @@ public class GLMPrior extends CalculationNode implements Function, Loggable {
             }
         }
 
-        // GLM values for each dimension
-        for (int i = 0; i < getDimension(); i++) {
-            out.print(getID() + "_value." + String.valueOf(i + 1) + "\t");
+        if (logValuesInput.get()) {
+            // GLM values for each dimension
+            for (int i = 0; i < getDimension(); i++) {
+                out.print(getID() + "_value." + String.valueOf(i + 1) + "\t");
+            }
         }
     }
 
@@ -270,11 +276,14 @@ public class GLMPrior extends CalculationNode implements Function, Loggable {
             }
         }
 
-        // GLM values for each dimension (predicted values)
-        for (int i = 0; i < getDimension(); i++) {
-            out.print(getArrayValue(i)+ "\t");
+        if (logValuesInput.get()){
+            // GLM values for each dimension (predicted values)
+            for (int i = 0; i < getDimension(); i++) {
+                out.print(getArrayValue(i)+ "\t");
 
+            }
         }
+
     }
 
     @Override

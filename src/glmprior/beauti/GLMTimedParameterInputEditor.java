@@ -365,6 +365,7 @@ public class GLMTimedParameterInputEditor extends InputEditor.Base {
                 } else {
                     error = (RealParameter) doc.pluginmap.get(getGLMErrorParameterID());
                 }
+                error.setDimension(glmValue.predictorsInput.get().get(0).getDimension());
                 glmValue.errorInput.setValue(error, glmValue);
             }
 

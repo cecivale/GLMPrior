@@ -19,6 +19,9 @@ package glmprior.parameterization;
 
 import bdmmprime.parameterization.TimedParameter;
 import beast.base.core.Input;
+import glmprior.util.GLMPrior;
+
+import java.io.PrintStream;
 
 
 /**
@@ -36,6 +39,29 @@ public class GLMTimedParameter extends TimedParameter {
         super.initAndValidate();
 
         isGLM = isGLMInput.get();
+    }
+
+    public void init(PrintStream out) {
+        super.init(out);
+        if (isGLM && valuesInput.get() instanceof GLMPrior) {
+                ((GLMPrior) valuesInput.get()).init(out);
+        }
+    }
+
+    @Override
+    public void log(long sample, PrintStream out) {
+        super.log(sample, out);
+        if (isGLM && valuesInput.get() instanceof GLMPrior) {
+                ((GLMPrior) valuesInput.get()).log(sample, out);
+        }
+    }
+
+    @Override
+    public void close(PrintStream out) {
+        super.close(out);
+        if (isGLM && valuesInput.get() instanceof GLMPrior) {
+                ((GLMPrior) valuesInput.get()).close(out);
+        }
     }
 
 

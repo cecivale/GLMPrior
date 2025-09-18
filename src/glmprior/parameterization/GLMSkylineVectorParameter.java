@@ -19,6 +19,9 @@ package glmprior.parameterization;
 
 import bdmmprime.parameterization.SkylineVectorParameter;
 import beast.base.core.Input;
+import glmprior.util.GLMPrior;
+
+import java.io.PrintStream;
 
 public class GLMSkylineVectorParameter extends SkylineVectorParameter {
 
@@ -37,5 +40,28 @@ public class GLMSkylineVectorParameter extends SkylineVectorParameter {
 
     public SkylineVectorParameter getSkylineVectorParameter() {
         return this;
+    }
+
+    public void init(PrintStream out) {
+        super.init(out);
+        if (isGLM && skylineValuesInput.get() instanceof GLMPrior) {
+                ((GLMPrior) skylineValuesInput.get()).init(out);
+        }
+    }
+
+    @Override
+    public void log(long sample, PrintStream out) {
+        super.log(sample, out);
+        if (isGLM && skylineValuesInput.get() instanceof GLMPrior) {
+                ((GLMPrior) skylineValuesInput.get()).log(sample, out);
+        }
+    }
+
+    @Override
+    public void close(PrintStream out) {
+        super.close(out);
+        if (isGLM && skylineValuesInput.get() instanceof GLMPrior) {
+                ((GLMPrior) skylineValuesInput.get()).close(out);
+        }
     }
 }

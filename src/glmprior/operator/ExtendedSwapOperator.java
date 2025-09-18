@@ -2,6 +2,7 @@ package glmprior.operator;
 
 import beast.base.core.Description;
 import beast.base.core.Input;
+import beast.base.core.Log;
 import beast.base.inference.Operator;
 import beast.base.inference.StateNode;
 import beast.base.inference.parameter.BooleanParameter;
@@ -42,25 +43,29 @@ public class ExtendedSwapOperator extends Operator {
 
         howMany = howManyInput.get();
         if (howMany * 2 > parameter.getDimension()) {
-            throw new IllegalArgumentException("howMany too large: must be less than half the parameter dimension");
-        }
+            this.m_pWeight.setValue(0, this);
+            Log.info("howMany ("+howMany+") too large: must be less than half the parameter dimension ("+parameter.getDimension()+")." +
+                    "Setting operator weight to 0 and turning it off!");
+//            throw new IllegalArgumentException("howMany too large: must be less than half the parameter dimension");
+        } else {
 
-        filter = parameterFilterInput.get();
-        if (filter != null) {
-            filter.initAndValidate();
-            if (filter.getDimension() != parameter.getDimension())
-                throw new IllegalArgumentException("Filter vector should have the same length as parameter");
-        }
-
-        List<Integer> list = new ArrayList<>();
-        for (int i = 0; i < parameter.getDimension(); i++) {
-            if (filter == null) {
-                list.add(i);
-            } else if (filter.getValue(i) == true) {
-                list.add(i);
+            filter = parameterFilterInput.get();
+            if (filter != null) {
+                filter.initAndValidate();
+                if (filter.getDimension() != parameter.getDimension())
+                    throw new IllegalArgumentException("Filter vector should have the same length as parameter");
             }
+
+            List<Integer> list = new ArrayList<>();
+            for (int i = 0; i < parameter.getDimension(); i++) {
+                if (filter == null) {
+                    list.add(i);
+                } else if (filter.getValue(i) == true) {
+                    list.add(i);
+                }
+            }
+            masterList = Collections.unmodifiableList(list);
         }
-        masterList = Collections.unmodifiableList(list);
     }
 
     @Override

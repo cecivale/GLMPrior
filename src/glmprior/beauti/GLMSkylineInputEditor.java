@@ -145,15 +145,25 @@ public abstract class GLMSkylineInputEditor extends InputEditor.Base {
         CheckBox estimateErrorCheckBox = new CheckBox("Estimate error");
         CheckBox logTransformPredictorsCheckBox = new CheckBox("Log-transform predictors");
         CheckBox standardizePredictorsCheckBox = new CheckBox("Standardize predictors");
+
+        // Add link function dropdown
+        HBox linkFunctionBox = FXUtils.newHBox();
+        Label linkFunctionLabel = new Label("Link function:");
+        ComboBox<String> linkFunctionComboBox = new ComboBox<>();
+        linkFunctionComboBox.getItems().addAll("identity", "log", "logit");
+        linkFunctionBox.getChildren().addAll(linkFunctionLabel, linkFunctionComboBox);
+
         VBox glmValuesTableBoxCol = FXUtils.newVBox();
         glmValuesTableBoxCol.getChildren().add(loadButton);
         glmValuesTableBoxCol.getChildren().add(showTableButton);
 //        glmValuesTableBoxCol.getChildren().add(glmValuesTable);
+        glmValuesTableBoxCol.getChildren().add(linkFunctionBox);
         glmValuesTableBoxCol.getChildren().add(estimateIndicatorsCheckBox);
         glmValuesTableBoxCol.getChildren().add(estimateErrorCheckBox);
         glmValuesTableBoxCol.getChildren().add(logTransformPredictorsCheckBox);
         glmValuesTableBoxCol.getChildren().add(standardizePredictorsCheckBox);
 
+        // Set initial values for GLM controls
         estimateIndicatorsCheckBox.setSelected(isGLM && ((GLMPrior) skylineParameter.skylineValuesInput.get()).indicatorsInput.get() != null &&
                 ((GLMPrior) skylineParameter.skylineValuesInput.get()).indicatorsInput.get().isEstimatedInput.get());
         estimateErrorCheckBox.setSelected(isGLM && ((GLMPrior) skylineParameter.skylineValuesInput.get()).errorInput.get() != null &&
@@ -162,6 +172,13 @@ public abstract class GLMSkylineInputEditor extends InputEditor.Base {
                 ((GLMPrior) skylineParameter.skylineValuesInput.get()).logTransformInput.get());
         standardizePredictorsCheckBox.setSelected(isGLM && ((GLMPrior) skylineParameter.skylineValuesInput.get()).standardizeInput.get() != null &&
                 ((GLMPrior) skylineParameter.skylineValuesInput.get()).standardizeInput.get());
+
+        // Set initial link function value
+        if (isGLM) {
+            linkFunctionComboBox.setValue(((GLMPrior) skylineParameter.skylineValuesInput.get()).linkFunctionInput.get());
+        } else {
+            linkFunctionComboBox.setValue("log"); // default value
+        }
         if (isGLM && !((GLMPrior) skylineParameter.skylineValuesInput.get()).predictorsInput.get().isEmpty()) {
             showTableButton.setManaged(true);
             showTableButton.setVisible(true);
@@ -393,6 +410,7 @@ public abstract class GLMSkylineInputEditor extends InputEditor.Base {
                 } else {
                     error = (RealParameter) doc.pluginmap.get(getGLMErrorParameterID());
                 }
+                error.setDimension(glmValue.predictorsInput.get().get(0).getDimension());
                 glmValue.errorInput.setValue(error, glmValue);
             }
 
@@ -426,8 +444,9 @@ public abstract class GLMSkylineInputEditor extends InputEditor.Base {
 
         estimateErrorCheckBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
             GLMPrior glmValue = (GLMPrior) skylineParameter.skylineValuesInput.get();
-            RealParameter error = glmValue.errorInput.get();
-            if (error == null && newValue){
+            RealParameter error;
+//            if (error == null && newValue){
+            if (newValue){
                 if (!doc.pluginmap.containsKey(getGLMErrorParameterID())) {
                     error = new RealParameter("0.001");
                     error.setID(getGLMErrorParameterID());
@@ -436,7 +455,12 @@ public abstract class GLMSkylineInputEditor extends InputEditor.Base {
                     error = (RealParameter) doc.pluginmap.get(getGLMErrorParameterID());
                     error.isEstimatedInput.setValue(newValue, error);
                 }
+                error.setDimension(glmValue.predictorsInput.get().get(0).getDimension());
                 glmValue.errorInput.setValue(error, glmValue);
+            } else {
+                error = (RealParameter) doc.pluginmap.get(getGLMErrorParameterID());
+                error.isEstimatedInput.setValue(newValue, error);
+                glmValue.errorInput.set(null);
             }
             glmValue.initAndValidate();
             sync();
@@ -459,6 +483,16 @@ public abstract class GLMSkylineInputEditor extends InputEditor.Base {
             glmValue.initAndValidate();
 //            System.out.println(glmValue);
             sync();
+        });
+
+        // Add link function dropdown event handler
+        linkFunctionComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (isGLM && newValue != null) {
+                GLMPrior glmValue = (GLMPrior) skylineParameter.skylineValuesInput.get();
+                glmValue.linkFunctionInput.setValue(newValue, glmValue);
+                glmValue.initAndValidate();
+                sync();
+            }
         });
 
 
@@ -547,6 +581,8 @@ public abstract class GLMSkylineInputEditor extends InputEditor.Base {
                     glmValue.setID(getGLMValuesParameterID());
                     skylineParameter.skylineValuesInput.setValue(glmValue, skylineParameter);
                 }
+                // Update link function dropdown when switching to GLM mode
+                linkFunctionComboBox.setValue(((GLMPrior) skylineParameter.skylineValuesInput.get()).linkFunctionInput.get());
                 updateGLMUI();
             }
         });

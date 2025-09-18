@@ -13,6 +13,8 @@
     <property name="local-beastfx-source-root" location="../BeastFX"/>
     <!-- Location to check for local copy of BDMM-Prime repository -->
     <property name="local-bdmmprime-source-root" location="../BDMM-Prime"/>
+    <!-- Location to check for local copy of feast repository -->
+    <property name="local-feast-source-root" location="../feast"/>
 
     <!-- BEAST 2 currently uses Java 17 -->
     <property name="sourceVersion" value="17"/>
@@ -190,6 +192,13 @@
                 <pathelement path="${build-beast}"/>
             </classpath>
         </java>
+        <java fork="true" classname="beast.pkgmgmt.PackageManager">
+            <jvmarg line="-Dbeast.user.package.dir=./deps"/>
+            <arg line="-add feast"/>
+            <classpath>
+                <pathelement path="${build-beast}"/>
+            </classpath>
+        </java>
     </target>
 
     <!-- Compile -->
@@ -208,6 +217,7 @@
                 <pathelement path="${build-beastfx}"/>
                 <fileset dir="${env.JAVA_FX_HOME}" includes="**/*.jar"/>
                 <fileset dir="deps/BDMM-Prime" includes="**/*.jar"/>
+                <fileset dir="deps/feast" includes="**/*.jar"/>
                 <fileset dir="deps/BEASTLabs" includes="**/*.jar"/>
             </classpath>
         </javac>
