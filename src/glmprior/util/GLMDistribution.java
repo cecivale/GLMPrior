@@ -1,6 +1,7 @@
 package glmprior.util;
 
 import beast.base.core.Description;
+import beast.base.core.Function;
 import beast.base.core.Input;
 import beast.base.core.Input.Validate;
 import beast.base.inference.distribution.ParametricDistribution;
@@ -36,7 +37,7 @@ public class GLMDistribution extends ParametricDistribution {
             "coefficients", "GLM coefficients β (dimension must match predictors)", 
             Validate.REQUIRED);
 
-    public Input<RealParameter> predictorsInput = new Input<>(
+    public Input<Function> predictorsInput = new Input<>(
             "predictors", "Predictor vector X (fixed values, dimension p)", 
             Validate.REQUIRED);
 
@@ -46,11 +47,11 @@ public class GLMDistribution extends ParametricDistribution {
             Validate.OPTIONAL);
 
     // Distribution family and link function specification
-    public Input<DistributionFamily> familyInput = new Input<>(
-            "family", "Distribution family", DistributionFamily.NORMAL, Validate.OPTIONAL);
+    public Input<String> familyInput = new Input<>(
+            "family", "Distribution family (NORMAL, POISSON, BINOMIAL, GAMMA)", "NORMAL", Validate.OPTIONAL);
 
-    public Input<LinkFunction> linkInput = new Input<>(
-            "link", "Link function (if not specified, uses canonical link for family)", 
+    public Input<String> linkInput = new Input<>(
+            "link", "Link function (IDENTITY, LOG, LOGIT, PROBIT, INVERSE, SQRT)",
             Validate.OPTIONAL);
 
     // Distribution-specific parameters
@@ -76,42 +77,53 @@ public class GLMDistribution extends ParametricDistribution {
     private DistributionFamily family;
     private LinkFunction link;
     private int p; // number of predictors
+    private Function predictors;
 
     @Override
     public void initAndValidate() {
         // Validate basic GLM components
-        final RealParameter beta = coefficientsInput.get();
-        final RealParameter X = predictorsInput.get();
-
-        if (beta == null || X == null) {
+        try{
+            if (coefficientsInput.get().getDimension() != predictorsInput.get().getDimension())
+                coefficientsInput.get().setDimension(predictorsInput.get().getDimension());
+        } catch (Exception e){
             throw new IllegalArgumentException("Both coefficients and predictors must be provided");
         }
 
-        if (beta.getDimension() != X.getDimension()) {
-            throw new IllegalArgumentException("Dimension mismatch: coefficients ("
-                    + beta.getDimension() + ") vs predictors (" + X.getDimension() + ")");
-        }
+        final RealParameter beta = coefficientsInput.get();
+
         p = beta.getDimension();
 
         // Validate indicators if provided
-        final BooleanParameter indicators = indicatorsInput.get();
-        if (indicators != null) {
-            if (indicators.getDimension() != p) {
-                throw new IllegalArgumentException("Dimension mismatch: indicators ("
-                        + indicators.getDimension() + ") vs coefficients (" + p + ")");
+        if (indicatorsInput.get() != null) {
+            if (indicatorsInput.get().getDimension() != p) {
+                indicatorsInput.get().setDimension(p);
             }
             // No additional validation needed for BooleanParameter - values are guaranteed to be true/false
         }
 
         // Set distribution family and link function
-        family = familyInput.get();
-        if (family == null) {
+        String familyStr = familyInput.get();
+        if (familyStr == null || familyStr.isEmpty()) {
             family = DistributionFamily.NORMAL;
+        } else {
+            try {
+                family = DistributionFamily.valueOf(familyStr.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid family name: " + familyStr +
+                    ". Valid options: NORMAL, POISSON, BINOMIAL, GAMMA");
+            }
         }
 
-        link = linkInput.get();
-        if (link == null) {
+        String linkStr = linkInput.get();
+        if (linkStr == null || linkStr.isEmpty()) {
             link = family.getCanonicalLink();
+        } else {
+            try {
+                link = LinkFunction.valueOf(linkStr.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid link function name: " + linkStr +
+                    ". Valid options: IDENTITY, LOG, LOGIT, PROBIT, INVERSE, SQRT");
+            }
         }
 
         // Validate family-link combination
@@ -120,8 +132,9 @@ public class GLMDistribution extends ParametricDistribution {
         // Validate distribution-specific parameters
         validateDistributionParameters();
 
+        predictors = predictorsInput.get();
         // Optional standardization (applied once at init)
-        if (Boolean.TRUE.equals(standardizeInput.get())) {
+        if (standardizeInput.get()) {
             standardizePredictors();
         }
     }
@@ -192,8 +205,7 @@ public class GLMDistribution extends ParametricDistribution {
      * Standardizes predictor variables (z-score normalization).
      */
     private void standardizePredictors() {
-        RealParameter X = predictorsInput.get();
-        Double[] vals = X.getValues();
+        double[] vals = predictors.getDoubleValues();
         
         // Calculate mean
         double mean = 0.0;
@@ -211,9 +223,11 @@ public class GLMDistribution extends ParametricDistribution {
         
         // Apply standardization
         if (sd > 0) {
+            Double[] tmp = new Double[vals.length];
             for (int i = 0; i < vals.length; i++) {
-                X.setValue(i, (vals[i] - mean) / sd);
+                tmp[i] = (vals[i] - mean) / sd;
             }
+            predictors = new RealParameter(tmp);
         }
     }
 
@@ -224,7 +238,7 @@ public class GLMDistribution extends ParametricDistribution {
     private double computeLinearPredictor() {
         double eta = interceptInput.get().getValue();
         final Double[] beta = coefficientsInput.get().getValues();
-        final Double[] x = predictorsInput.get().getValues();
+        final double[] x = predictors.getDoubleValues();
         final BooleanParameter indicators = indicatorsInput.get();
         
         for (int j = 0; j < p; j++) {
