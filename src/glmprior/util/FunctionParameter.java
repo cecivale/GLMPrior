@@ -138,4 +138,45 @@ public class FunctionParameter extends RealParameter {
         return function;
     }
 
+    /**
+     * FunctionParameter values are always computed, never stored.
+     * @return true always
+     */
+    public boolean isComputed() {
+        return true;
+    }
+
+    /**
+     * Since values are computed from the underlying function,
+     * recalculation is always required.
+     * @return true always
+     */
+    public boolean requiresRecalculation() {
+        return true;
+    }
+
+    /**
+     * Setting values quietly is not supported since values are computed from the underlying Function.
+     * @throws UnsupportedOperationException always
+     */
+    public void setValueQuietly(int index, Double value) {
+        throw new UnsupportedOperationException("Cannot set values on FunctionParameter - values are computed from underlying Function");
+    }
+
+    /**
+     * Assigning from string is not supported since values are computed from the underlying Function.
+     * @throws UnsupportedOperationException always
+     */
+    public void assignFrom(String other) {
+        throw new UnsupportedOperationException("Cannot assign values to FunctionParameter - values are computed from underlying Function");
+    }
+
+    /**
+     * Assigning from string without ID is not supported since values are computed from the underlying Function.
+     * @throws UnsupportedOperationException always
+     */
+    public void assignFromWithoutID(String other) {
+        throw new UnsupportedOperationException("Cannot assign values to FunctionParameter - values are computed from underlying Function");
+    }
+
 }
