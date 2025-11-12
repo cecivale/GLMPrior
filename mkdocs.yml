@@ -2,3 +2,8 @@ site_name: GLMPrior
 site_url: https://cecivale.github.io/GLMPrior/
 theme:
   name: readthedocs
+nav:
+  - Introduction: introduction.md
+  - Installation: installation.md
+  - Setting Up Analyses: setup.md
+  - Citation and License: citation_license.md
