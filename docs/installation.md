@@ -1,11 +1,18 @@
 # Installation
 
+GLMPrior depends on the following BEAST2 packages:
+
+* [BDMM-Prime](https://github.com/tgvaughan/BDMM-Prime)
+* [feast](https://github.com/tgvaughan/feast)
+
+When you install through BEAUti or build from source they will be downloaded automatically. When installing by hand, keep in mind to install the above packages first. 
+
 ## From BEAUTi
 
 1. Launch BEAUTi.
 2. Select `File -> Manage packages`.
 3. In the new window at the bottom menu, select `Package repositories`.
-4. Click `Add URL`, paste the link [https://raw.githubusercontent.com/jugne/stratigraphic-ranges/master/package.xml](https://raw.githubusercontent.com/cecivale/GLMPrior/refs/heads/main/package.xml) and click `OK`.
+4. Click `Add URL`, paste the link [https://raw.githubusercontent.com/cecivale/GLMPrior/refs/heads/main/package.xml](https://raw.githubusercontent.com/cecivale/GLMPrior/refs/heads/main/package.xml) and click `OK`.
 5. Now close the Package Repository Manager window. You should now see GLMPrior package listed among the other packages.
 6. Select the GLMPrior package and click `Install\Upgrade`.
 7. In order to use the combined BDMM-Prime and GLMPrior template you will need to restart BEAUTi.
