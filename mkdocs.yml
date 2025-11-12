@@ -1,0 +1,4 @@
+site_name: GLMPrior
+site_url: https://cecivale.github.io/GLMPrior/
+theme:
+  name: readthedocs
