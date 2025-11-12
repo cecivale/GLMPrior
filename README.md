@@ -1,6 +1,6 @@
 # GLMPrior (in development)
 
-`GLMPrior` is a package designed to define flexible generalized linear model (GLM) prior distributions for any parameter in a BEAST2 phylodynamic analysis. Due to some interface limitations in BEAST2, it currently only works with packages that accept 'Function' parameters, for example, [BDMM-Prime](https://github.com/tgvaughan/BDMM-Prime/tree/master) package for (structured) birth-dath-sampling analyses with constant rates or rates changing over time. 
+`GLMPrior` is a package designed to define flexible generalized linear model (GLM) prior distributions for any parameter in a BEAST2 phylodynamic analysis. Due to some interface limitations in BEAST2, it currently only works with packages that accept parameters of class `Function`. For example, [BDMM-Prime](https://github.com/tgvaughan/BDMM-Prime/tree/master) package for (structured) birth-dath-sampling analyses with constant rates or rates changing over time. 
 
 Below you will find information on building GLMPrior from source, citation and license. For general information on the package, installation and set-up instructions, visit project web page:
 
