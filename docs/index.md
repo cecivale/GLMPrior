@@ -1,6 +1,6 @@
 # Introduction
 
-This document provides a brief guide on how to use the `GLMPrior` class and how to set it up within BEAUti for BDMM-Prime analyses in BEAST2.
+This page provides a brief guide on how to use the `GLMPrior` class and how to set it up within BEAUti for BDMM-Prime analyses in BEAST2.
 
     ⚠️ Note:
     This package is still under active development and considered experimental. Some features may not work as expected, and errors can occur. 
