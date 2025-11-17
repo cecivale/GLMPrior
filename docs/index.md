@@ -2,6 +2,10 @@
 
 This page provides a brief guide on how to use the `GLMPrior` class and how to set it up within BEAUti for BDMM-Prime analyses in BEAST2.
 
+
+This manual is dedicated to the usage of GLMPrior. If you interested in the source code, visit [https://github.com/cecivale/GLMPrior](https://github.com/cecivale/GLMPrior).
+
+
     ⚠️ Note:
     This package is still under active development and considered experimental. Some features may not work as expected, and errors can occur. 
     Please use with caution and report any issues to the developers.

@@ -6,7 +6,7 @@ Please cite the following papers if using GLMPrior:
 PLoS computational biology, 15(4), e1006650 (2019), [doi:10.1371/journal.pcbi.1006650](https://doi.org/10.1371/journal.pcbi.1006650).
 > TODO GLM
 
-Please cite the following papers if using GLMPrior together with BDMM-Prime:
+Please also cite the following papers if using GLMPrior together with BDMM-Prime:
 
 * Vaughan and Stadler, "Bayesian phylodynamic inference of multi-type population trajectories using genomic data",
 MBE, 42(6):msaf130 (2025), [doi:10.1093/molbev/msaf130](https://doi.org/10.1093/molbev/msaf130)
