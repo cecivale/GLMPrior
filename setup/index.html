@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://cecivale.github.io/GLMPrior/setup/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Setting Up Analyses - GLMPrior</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Setting Up Analyses";
+        var mkdocs_page_input_path = "setup.md";
+        var mkdocs_page_url = "/GLMPrior/setup/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> GLMPrior
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Introduction</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../installation/">Installation</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Setting Up Analyses</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#setup-instructions">Setup Instructions</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#format-requirements-for-predictor-files-in-beauti-only-for-bdmm-prime">Format Requirements for Predictor Files in BEAUTi (only for BDMM-Prime)</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../citation_license/">Citation and License</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">GLMPrior</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Setting Up Analyses</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="model-specification-using-beauti">Model Specification using BEAUti</h1>
+<pre><code>⚠️ Note:
+The GLMPrior package and its integration in BEAUti are under active development and not yet fully stable. Errors may occur, and unexpected behavior is possible.
+Please follow the setup instructions exactly in the order provided, and avoid navigating back and forth between steps in BEAUti. 
+Doing so may break the setup or result in an invalid XML file. 
+If issues arise, restarting the BEAUti setup from scratch is recommended.
+</code></pre>
+<h2 id="setup-instructions">Setup Instructions</h2>
+<ol>
+<li>Begin setting up your BDMM-Prime analysis as usual: load your alignment, set tip dates, substitution and clock models.</li>
+<li>In the <strong>Priors</strong> panel, select the <strong>BDMMPrime</strong> tree prior, and set the tip types at the bottom.</li>
+<li>Choose the parameterization:</li>
+<li><strong>GLMEpiParameterization</strong> (reproductive number, becoming uninfectious rate, sampling proportion), or</li>
+<li><strong>GLMCanonicalParameterization</strong> (birth, death, and sampling rates)<br />
+   from the <strong>Parameterization</strong> dropdown.</li>
+<li>For parameters without GLM prior, proceed as usual.</li>
+<li>For parameters with GLM prior, follow these steps:  </li>
+<li>Specify if the parameter has the same value across all types (“scalar values”, default) or varies (deselect scalar).  </li>
+<li>Specify the number of change times; define change times and related specs.  </li>
+<li>Tick <strong>Use GLM</strong> next to the parameter.  </li>
+<li>Click <strong>Load GLM predictors CSV</strong> to select your predictor file(s).  </li>
+<li>Click <strong>Show Table</strong> to check your predictors.  </li>
+<li>Select/deselect <strong>Estimate indicators</strong> as appropriate. </li>
+<li>Select/deselect <strong>Estimate error</strong> as appropriate.  </li>
+<li>Select/deselect <strong>Log transform</strong> and <strong>Standardize</strong> depending on your predictors.  </li>
+<li>Define a sensible prior for <strong>μ₀</strong> (baseline on natural scale).  </li>
+<li>Leave default priors for coefficients, indicators, and error unless you have reasons to change them.</li>
+</ol>
+<h2 id="format-requirements-for-predictor-files-in-beauti-only-for-bdmm-prime">Format Requirements for Predictor Files in BEAUTi (only for BDMM-Prime)</h2>
+<ul>
+<li>CSV format.</li>
+<li>One predictor per row (you may load one or multiple files; they append predictors).</li>
+<li>The order of predictor values must match the order of the parameter elements.<br />
+  For BDMM-Prime: elements are ordered alphabetically by type, and if multiple epochs exist, order is by epoch then by type within each epoch.  See <a href="https://tgvaughan.github.io/BDMM-Prime/#id-2-Model-specification-using-BEAUti-Skyline-parameters">BDMM-Prime documentation</a>. Note this order varies for other BEAST2 packages.</li>
+<li>Rows must be named; columns may be named or unnamed.</li>
+</ul>
+<p><em>Examples</em></p>
+<ul>
+<li><strong>1D parameter (e.g., multi-type transmission rate):</strong></li>
+</ul>
+<pre><code class="language-csv">example 1,6,4,3,5
+</code></pre>
+<ul>
+<li><strong>2D parameter (e.g., skyline multi-type sampling rate):</strong></li>
+</ul>
+<pre><code class="language-csv">Predictor,Epoch 1,,,,,Epoch 3,,,,
+,Type1,Type2,Type3,Type4,Type5,Type1,Type2,Type3,Type4,Type5
+example,1,6,4,3,5,3,2,8,3,1
+</code></pre>
+<ul>
+<li><strong>3D parameter (e.g., skyline migration rate):</strong></li>
+</ul>
+<pre><code class="language-csv">Predictor,Epoch 1,,,,,,,,,,,,,,,,,,,,Epoch 2,,,,,,,,,,,,,,,,,,,,Epoch 3,,,,,,,,,,,,,,,,,,,,Epoch 4,,,,,,,,,,,,,,,,,,,
+,T1,,,,T2,,,,T3,,,,T4,,,,T5,,,,T1,,,,T2,,,,T3,,,,T4,,,,T5,,,,T1,,,,T2,,,,T3,,,,T4,,,,T5,,,,T1,,,,T2,,,,T3,,,,T4,,,,T5,,,
+,T2,T3,T4,T5,T1,T3,T4,T5,T1,T2,T4,T5,T1,T2,T3,T5,T1,T2,T3,T4,T2,T3,T4,T5,T1,T3,T4,T5,T1,T2,T4,T5,T1,T2,T3,T5,T1,T2,T3,T4,T2,T3,T4,T5,T1,T3,T4,T5,T1,T2,T4,T5,T1,T2,T3,T5,T1,T2,T3,T4,T2,T3,T4,T5,T1,T3,T4,T5,T1,T2,T4,T5,T1,T2,T3,T5,T1,T2,T3,T4
+example,-1.34,-1.35,-1.35,-1.34,-1.04,-0.09,-0.46,1.07,-1.04,-0.23,-0.45,1.22,-1.35,-0.36,-0.24,0.53,-1.24,0.22,0.53,-0.38,-1.31,-1.32,-1.35,-1.31,-0.94,0.40,0.52,1.56,-0.95,0.25,0.46,1.76,-1.34,0.62,0.68,1.69,-1.15,0.62,0.92,0.65,-1.23,-1.22,-1.28,-1.05,-0.33,0.41,0.56,1.53,-0.45,0.23,0.47,1.71,-0.57,0.66,0.72,1.73,-0.57,0.75,1.03,0.83,-1.24,-1.26,-1.30,-1.12,-0.28,0.41,0.60,1.58,-0.38,0.28,0.55,1.82,-0.51,0.68,0.74,1.79,-0.50,0.68,0.98,0.76
+</code></pre>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../installation/" class="btn btn-neutral float-left" title="Installation"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../citation_license/" class="btn btn-neutral float-right" title="Citation and License">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../installation/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../citation_license/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
