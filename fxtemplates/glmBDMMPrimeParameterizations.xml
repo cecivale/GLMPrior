@@ -489,36 +489,36 @@
         <![CDATA[
             <parameterization id="GLMCanonicalBDMMPrimeParameterization.t:$(n)"
                         spec="glmprior.parameterization.GLMCanonicalParameterization">
-                        <processLength idref="originBDMMPrime.t:$(n)"/>
+                        <processLength idref="processLengthBDMMPrime.t:$(n)"/>
                         <typeSet idref="typeSetBDMMPrime.t:$(n)"/>
                         <birthRate id="birthRateSPGLMCanonical.t:$(n)" spec="glmprior.parameterization.GLMSkylineVectorParameter" typeSet="@typeSetBDMMPrime.t:$(n)" timesAreAges="true" isGLM="false">
-                            <processLength idref="originBDMMPrime.t:$(n)"/>
+                            <processLength idref="processLengthBDMMPrime.t:$(n)"/>
                             <skylineValues id="birthRateGLMCanonical.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.0" lower="0.0"/>
                         </birthRate>
                         <birthRateAmongDemes id="birthRateAmongDemesSPGLMCanonical.t:$(n)" spec="glmprior.parameterization.GLMSkylineMatrixParameter" typeSet="@typeSetBDMMPrime.t:$(n)" timesAreAges="true">
-                            <processLength idref="originBDMMPrime.t:$(n)"/>
+                            <processLength idref="processLengthBDMMPrime.t:$(n)"/>
                             <skylineValues id="birthRateAmongDemesGLMCanonical.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="0.0" lower="0.0"/>
                         </birthRateAmongDemes>
                         <deathRate id="deathRateSPGLMCanonical.t:$(n)" spec="glmprior.parameterization.GLMSkylineVectorParameter" typeSet="@typeSetBDMMPrime.t:$(n)" timesAreAges="true">
-                            <processLength idref="originBDMMPrime.t:$(n)"/>
+                            <processLength idref="processLengthBDMMPrime.t:$(n)"/>
                             <skylineValues id="deathRateGLMCanonical.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.0" lower="0.0"/>
                         </deathRate>
                         <migrationRate id="migrationRateSPGLMCanonical.t:$(n)" spec="glmprior.parameterization.GLMSkylineMatrixParameter" typeSet="@typeSetBDMMPrime.t:$(n)" timesAreAges="true">
-                            <processLength idref="originBDMMPrime.t:$(n)"/>
+                            <processLength idref="processLengthBDMMPrime.t:$(n)"/>
                             <skylineValues id="migrationRateGLMCanonical.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.0" lower="0.0"/>
                         </migrationRate>
 
                         <samplingRate id="samplingRateSPGLMCanonical.t:$(n)" spec="glmprior.parameterization.GLMSkylineVectorParameter" typeSet="@typeSetBDMMPrime.t:$(n)" timesAreAges="true">
-                            <processLength idref="originBDMMPrime.t:$(n)"/>
+                            <processLength idref="processLengthBDMMPrime.t:$(n)"/>
                             <skylineValues id="samplingRateGLMCanonical.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="0.1" lower="0.0"/>
                         </samplingRate>
                         <removalProb id="removalProbSPGLMCanonical.t:$(n)" spec="glmprior.parameterization.GLMSkylineVectorParameter" typeSet="@typeSetBDMMPrime.t:$(n)" timesAreAges="true">
-                            <processLength idref="originBDMMPrime.t:$(n)"/>
+                            <processLength idref="processLengthBDMMPrime.t:$(n)"/>
                             <skylineValues id="removalProbGLMCanonical.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.0" lower="0.0" upper="1.0" estimate="false"/>
                         </removalProb>
 
                         <rhoSampling id="rhoSamplingProbSPGLMCanonical.t:$(n)" spec="glmprior.parameterization.GLMTimedParameter" typeSet="@typeSetBDMMPrime.t:$(n)" timesAreAges="true">
-                            <processLength idref="originBDMMPrime.t:$(n)"/>
+                            <processLength idref="processLengthBDMMPrime.t:$(n)"/>
                         </rhoSampling>
             </parameterization>
 
@@ -594,35 +594,35 @@
             <![CDATA[
             <parameterization id="GLMEpiBDMMPrimeParameterization.t:$(n)"
                               spec="glmprior.parameterization.GLMEpiParameterization">
-                        <processLength idref="originBDMMPrime.t:$(n)"/>
+                        <processLength idref="processLengthBDMMPrime.t:$(n)"/>
                         <typeSet idref="typeSetBDMMPrime.t:$(n)"/>
                         <Re id="ReSPGLMEpi.t:$(n)" spec="glmprior.parameterization.GLMSkylineVectorParameter" typeSet="@typeSetBDMMPrime.t:$(n)" timesAreAges="true">
-                            <processLength idref="originBDMMPrime.t:$(n)"/>
+                            <processLength idref="processLengthBDMMPrime.t:$(n)"/>
                             <skylineValues id="ReGLMEpi.t:$(n)" spec='beast.base.inference.parameter.RealParameter' value="1.0" lower="0.0"/>
                         </Re>
                         <ReAmongDemes id="ReAmongDemesSPGLMEpi.t:$(n)" spec="glmprior.parameterization.GLMSkylineMatrixParameter" typeSet="@typeSetBDMMPrime.t:$(n)" timesAreAges="true">
-                            <processLength idref="originBDMMPrime.t:$(n)"/>
+                            <processLength idref="processLengthBDMMPrime.t:$(n)"/>
                             <skylineValues id="ReAmongDemesGLMEpi.t:$(n)" spec='beast.base.inference.parameter.RealParameter' value="0.0" lower="0.0" estimate="false"/>
                         </ReAmongDemes>
                         <becomeUninfectiousRate id="becomeUninfectiousRateSPGLMEpi.t:$(n)" spec="glmprior.parameterization.GLMSkylineVectorParameter" typeSet="@typeSetBDMMPrime.t:$(n)" timesAreAges="true">
-                            <processLength idref="originBDMMPrime.t:$(n)"/>
+                            <processLength idref="processLengthBDMMPrime.t:$(n)"/>
                             <skylineValues id="becomeUninfectiousRateGLMEpi.t:$(n)" spec='beast.base.inference.parameter.RealParameter' value="1.0" lower="0.0"/>
                         </becomeUninfectiousRate>
                         <migrationRate id="migrationRateSPGLMEpi.t:$(n)" spec="glmprior.parameterization.GLMSkylineMatrixParameter" typeSet="@typeSetBDMMPrime.t:$(n)" timesAreAges="true">
-                            <processLength idref="originBDMMPrime.t:$(n)"/>
+                            <processLength idref="processLengthBDMMPrime.t:$(n)"/>
                             <skylineValues id="migrationRateGLMEpi.t:$(n)" spec='beast.base.inference.parameter.RealParameter' value="1.0" lower="0.0" estimate="false"/>
                         </migrationRate>
                         <samplingProportion id="samplingProportionSPGLMEpi.t:$(n)" spec="glmprior.parameterization.GLMSkylineVectorParameter" typeSet="@typeSetBDMMPrime.t:$(n)" timesAreAges="true">
-                            <processLength idref="originBDMMPrime.t:$(n)"/>
+                            <processLength idref="processLengthBDMMPrime.t:$(n)"/>
                             <skylineValues id="samplingProportionGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="0.1" lower="0.0" upper="1.0"/>
                         </samplingProportion>
                         <removalProb id="removalProbSPGLMEpi.t:$(n)" spec="glmprior.parameterization.GLMSkylineVectorParameter" typeSet="@typeSetBDMMPrime.t:$(n)" timesAreAges="true">
-                            <processLength idref="originBDMMPrime.t:$(n)"/>
+                            <processLength idref="processLengthBDMMPrime.t:$(n)"/>
                             <skylineValues id="removalProbGLMEpi.t:$(n)" spec="beast.base.inference.parameter.RealParameter" value="1.0" lower="0.0" upper="1.0" estimate="false"/>
                         </removalProb>
 
                         <rhoSampling id="rhoSamplingProbSPGLMEpi.t:$(n)" spec="glmprior.parameterization.GLMTimedParameter" typeSet="@typeSetBDMMPrime.t:$(n)" timesAreAges="true">
-                            <processLength idref="originBDMMPrime.t:$(n)"/>
+                            <processLength idref="processLengthBDMMPrime.t:$(n)"/>
                         </rhoSampling>
             </parameterization>
 

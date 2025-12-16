@@ -89,7 +89,6 @@ public class GLMSkylineVectorInputEditor extends GLMSkylineInputEditor {
                 valuesParam.setDimension(nTypes * nEpochs);
             sanitiseRealParameter(valuesParam);
         }
-        System.out.println("Number of epochs: " + nEpochs);
 
         if (skylineParameter.changeTimesInput.get() != null)
             ((RealParameter) skylineParameter.changeTimesInput.get()).initAndValidate();

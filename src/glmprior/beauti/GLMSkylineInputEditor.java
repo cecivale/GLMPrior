@@ -2,6 +2,7 @@ package glmprior.beauti;
 
 import bdmmprime.beauti.EpochVisualizerPane;
 import bdmmprime.distribution.BirthDeathMigrationDistribution;
+import bdmmprime.parameterization.Parameterization;
 import bdmmprime.parameterization.SkylineParameter;
 import beast.base.core.BEASTInterface;
 import beast.base.core.Input;
@@ -92,6 +93,7 @@ public abstract class GLMSkylineInputEditor extends InputEditor.Base {
         changeTimesBox.getChildren().add(changeTimesEntryRow);
         HBox changeTimesBoxRow = FXUtils.newHBox();
         CheckBox timesAreAgesCheckBox = new CheckBox("Times specified as ages");
+        timesAreAgesCheckBox.setTooltip(new Tooltip("If selected, change times are treated as ages relative to the final sample."));
         changeTimesBoxRow.getChildren().add(timesAreAgesCheckBox);
         CheckBox estimateTimesCheckBox = new CheckBox("Estimate change times");
         changeTimesBoxRow.getChildren().add(estimateTimesCheckBox);
@@ -101,6 +103,7 @@ public abstract class GLMSkylineInputEditor extends InputEditor.Base {
         CheckBox timesAreRelativeCheckBox = new CheckBox("Relative to process length");
         changeTimesBoxRow.getChildren().add(timesAreRelativeCheckBox);
         Button distributeChangeTimesButton = new Button("Distribute evenly");
+        distributeChangeTimesButton.setTooltip(new Tooltip("Distribute change times evenly over the full process length."));
         changeTimesBoxRow.getChildren().add(distributeChangeTimesButton);
         changeTimesBox.getChildren().add(changeTimesBoxRow);
 
@@ -215,6 +218,7 @@ public abstract class GLMSkylineInputEditor extends InputEditor.Base {
         boxHoriz.getChildren().add(scalarRatesCheckBox);
         CheckBox linkValuesCheckBox = new CheckBox("Link identical values");
         linkValuesCheckBox.setSelected(skylineParameter.linkIdenticalValuesInput.get());
+        linkValuesCheckBox.setTooltip(new Tooltip("Cause BEAST to treat initially identical values as a single parameter."));
         boxHoriz.getChildren().add(linkValuesCheckBox);
 
         mainInputBox.getChildren().add(boxHoriz);
@@ -272,7 +276,6 @@ public abstract class GLMSkylineInputEditor extends InputEditor.Base {
 
         // Add event listeners:
         changeCountSpinner.valueProperty().addListener((observable, oldValue, newValue) -> {
-            System.out.println(oldValue + " -> " + newValue);
 
             if (newValue > 0) {
                 RealParameter param = (RealParameter) skylineParameter.changeTimesInput.get();
@@ -309,8 +312,6 @@ public abstract class GLMSkylineInputEditor extends InputEditor.Base {
                 changeTimesBox.setVisible(false);
             }
 
-            System.out.println(skylineParameter);
-            System.out.println(scalarRatesCheckBox.isSelected());
 
             if (!isGLM) {
                 if (!(skylineParameter.skylineValuesInput.get() instanceof RealParameter)) {
@@ -425,7 +426,6 @@ public abstract class GLMSkylineInputEditor extends InputEditor.Base {
         timesAreAgesCheckBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
             skylineParameter.timesAreAgesInput.setValue(newValue, skylineParameter);
             skylineParameter.initAndValidate();
-            System.out.println(skylineParameter);
             epochVisualizer.repaintCanvas();
         });
 
@@ -469,19 +469,15 @@ public abstract class GLMSkylineInputEditor extends InputEditor.Base {
 
         logTransformPredictorsCheckBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
             GLMPrior glmValue = (GLMPrior) skylineParameter.skylineValuesInput.get();
-//            Boolean logTransform = glmValue.logTransformInput.get();
             glmValue.logTransformInput.setValue(newValue, glmValue);
             glmValue.initAndValidate();
-//            System.out.println(glmValue);
             sync();
         });
 
         standardizePredictorsCheckBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
             GLMPrior glmValue = (GLMPrior) skylineParameter.skylineValuesInput.get();
-//            BooleanParameter indicators = glmValue.indicatorsInput.get();
             glmValue.standardizeInput.setValue(newValue, glmValue);
             glmValue.initAndValidate();
-//            System.out.println(glmValue);
             sync();
         });
 
@@ -499,7 +495,6 @@ public abstract class GLMSkylineInputEditor extends InputEditor.Base {
         timesAreRelativeCheckBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
             skylineParameter.timesAreRelativeInput.setValue(newValue, skylineParameter);
             skylineParameter.initAndValidate();
-            System.out.println(skylineParameter);
             epochVisualizer.repaintCanvas();
         });
 
@@ -507,17 +502,15 @@ public abstract class GLMSkylineInputEditor extends InputEditor.Base {
 
             RealParameter changeTimesParam = (RealParameter) skylineParameter.changeTimesInput.get();
             int nTimes = changeTimesParam.getDimension();
+            double processLength = skylineParameter.processLengthInput.get().getArrayValue();
 
             if (skylineParameter.timesAreRelativeInput.get()) {
                 for (int i = 0; i < nTimes; i++) {
                     changeTimesParam.setValue(i, ((double) (i + 1)) / (nTimes + 1));
                 }
             } else {
-                if (nTimes > 1) {
-                    for (int i = 0; i < nTimes - 1; i++) {
-                        changeTimesParam.setValue(i,
-                                (changeTimesParam.getArrayValue(nTimes - 1) * (i + 1)) / (nTimes + 1));
-                    }
+                for (int i = 0; i < nTimes; i++) {
+                    changeTimesParam.setValue(i, processLength*(i+1) / (nTimes + 1));
                 }
             }
 
@@ -535,7 +528,6 @@ public abstract class GLMSkylineInputEditor extends InputEditor.Base {
             } else {
                 updateGLMUI();
             }
-            System.out.println(skylineParameter);
             epochVisualizer.setScalar(newValue);
         });
 
@@ -600,6 +592,8 @@ public abstract class GLMSkylineInputEditor extends InputEditor.Base {
         });
 
         visualizerCheckBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue)
+                epochVisualizer.repaintCanvas();
             skylineParameter.epochVisualizerDisplayed = newValue;
             epochVisualizer.setVisible(newValue);
             epochVisualizer.setManaged(newValue);
@@ -754,7 +748,6 @@ public abstract class GLMSkylineInputEditor extends InputEditor.Base {
                 parameter.setValue(index, Double.valueOf(newValue));
                 sanitiseRealParameter(parameter);
                 skylineParameter.initAndValidate();
-                System.out.println(skylineParameter);
                 epochVisualizer.repaintCanvas();
             });
 
@@ -837,10 +830,18 @@ public abstract class GLMSkylineInputEditor extends InputEditor.Base {
     }
 
     protected TraitSet getTypeTraitSet() {
-        BirthDeathMigrationDistribution bdmmPrimeDistrib =
-                (BirthDeathMigrationDistribution) doc.pluginmap.get("BDMMPrime.t:" + getPartitionID());
+        for (BEASTInterface out : skylineParameter.getOutputs()) {
+            if (out instanceof Parameterization param) {
+                for (BEASTInterface out2 : param.getOutputs()) {
+                    if (out2 instanceof  BirthDeathMigrationDistribution bdmmPrimeDistrib) {
+                        return bdmmPrimeDistrib.typeTraitSetInput.get();
+                    }
+                }
+            }
+        }
 
-        return bdmmPrimeDistrib.typeTraitSetInput.get();
+        throw new IllegalStateException("SkylineParameter not connected " +
+                "to a BirthDeathMigrationModel.");
     }
 
     /**

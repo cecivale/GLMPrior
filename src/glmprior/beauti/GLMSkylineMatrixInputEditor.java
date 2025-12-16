@@ -99,7 +99,6 @@ public class GLMSkylineMatrixInputEditor extends GLMSkylineInputEditor {
             sanitiseRealParameter(valuesParam);
             ((RealParameter) skylineParameter.skylineValuesInput.get()).initAndValidate();
         }
-        System.out.println("Number of epochs: " + nEpochs);
 
         if (skylineParameter.changeTimesInput.get() != null)
             ((RealParameter) skylineParameter.changeTimesInput.get()).initAndValidate();
@@ -329,7 +328,6 @@ public class GLMSkylineMatrixInputEditor extends GLMSkylineInputEditor {
                     }
                     ensureValuesConsistency();
                     sanitiseRealParameter(valuesParameter);
-                    System.out.println(skylineMatrix);
                 });
                 epochCol.getColumns().add(col);
             }

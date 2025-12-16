@@ -225,19 +225,12 @@ public class GLMTimedParameterInputEditor extends InputEditor.Base {
 
         // Add event listeners:
         timeCountSpinner.valueProperty().addListener((observable, oldValue, newValue) -> {
-            System.out.println(oldValue + " -> " + newValue);
 
             if (newValue > 0) {
-//                if (!isGLM){
                     RealParameter times = getTimesParam();
                     times.setDimension(newValue);
                     sanitiseRealParameter(times);
                     timedParameter.timesInput.setValue(times, timedParameter);
-//                } else {
-//                    GLMLogLinear glmTimesValue = new GLMLogLinear();
-//                    glmTimesValue.setID(getTimesParameterID());
-//                    timedParameter.timesInput.setValue(glmTimesValue, timedParameter);
-//                }
             } else {
                 if (estimateTimesCheckBox.isSelected())
                     estimateTimesCheckBox.fire();
@@ -269,23 +262,6 @@ public class GLMTimedParameterInputEditor extends InputEditor.Base {
                 timesAndValuesBox.setManaged(false);
                 timesAndValuesBox.setVisible(false);
             }
-
-            System.out.println(timedParameter);
-            System.out.println(scalarValues.isSelected());
-//                    valuesParameter.setDimension(newValue);
-//
-//                    valuesParameter.setID(getGLMValuesParameterID());
-//                    timedParameter.timesInput.setValue(valuesParameter, timedParameter);
-//                }
-//                updateValuesUI();
-//            } else {
-//                if (!(timedParameter.timesInput.get() instanceof GLMLogLinear)) {
-//                    GLMLogLinear glmValue = new GLMLogLinear();
-//                    glmValue.setID(getGLMValuesParameterID());
-//                    timedParameter.timesInput.setValue(glmValue, timedParameter);
-//                }
-//                updateGLMUI();
-//            }
         });
 
         loadButton.setOnAction(event -> {
@@ -379,7 +355,6 @@ public class GLMTimedParameterInputEditor extends InputEditor.Base {
         timesAreAgesCheckBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
             timedParameter.timesAreAgesInput.setValue(newValue, timedParameter);
             timedParameter.initAndValidate();
-            System.out.println(timedParameter);
         });
 
         estimateTimesCheckBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
@@ -397,7 +372,6 @@ public class GLMTimedParameterInputEditor extends InputEditor.Base {
             sanitiseRealParameter(getValuesParam());
             ensureValuesConsistency(newValue);
             updateValuesUI();
-            System.out.println(timedParameter);
         });
 
         estimateValuesCheckBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
@@ -464,7 +438,6 @@ public class GLMTimedParameterInputEditor extends InputEditor.Base {
                 parameter.setValue(index, Double.valueOf(newValue));
                 sanitiseRealParameter(parameter);
                 timedParameter.initAndValidate();
-                System.out.println(timedParameter);
             });
 
             changeTimesEntryRow.getChildren().add(textField);
@@ -512,7 +485,6 @@ public class GLMTimedParameterInputEditor extends InputEditor.Base {
                     valuesParameter.setValue(epochIdx*nTypes + type, e.getNewValue());
                 }
                 sanitiseRealParameter(valuesParameter);
-                System.out.println(timedParameter);
             });
             valuesTable.getColumns().add(col);
         }
@@ -594,8 +566,6 @@ public class GLMTimedParameterInputEditor extends InputEditor.Base {
         int nEpochs = timedParameter.timesInput.get() == null
                 ? 0
                 : timedParameter.timesInput.get().getDimension();
-
-        System.out.println("Number of epochs: " + nEpochs);
 
         boolean isParamGLM = timedParameter.valuesInput.get() instanceof GLMPrior;
 
