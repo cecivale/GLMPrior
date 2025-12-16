@@ -403,6 +403,17 @@ public class MultiGLMDistribution extends ParametricDistribution {
     }
 
     /**
+     * Gets means from all dimensions.
+     */
+    public double[] getAllStoredMeans() {
+        double[] means = new double[numDimensions];
+        for (int i = 0; i < numDimensions; i++) {
+            means[i] = glmDistributions.get(i).getStoredMean();
+        }
+        return means;
+    }
+
+    /**
      * Gets the variance from a specific dimension's GLMDistribution.
      */
     public double getVariance(int index) {

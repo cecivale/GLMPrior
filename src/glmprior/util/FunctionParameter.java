@@ -5,6 +5,8 @@ import beast.base.core.Function;
 import beast.base.core.Input;
 import beast.base.inference.parameter.RealParameter;
 
+import java.io.PrintStream;
+
 /**
  * A RealParameter that wraps a Function, allowing Function-based computations
  * to be used wherever a RealParameter is expected in BEAST2.
@@ -177,6 +179,18 @@ public class FunctionParameter extends RealParameter {
      */
     public void assignFromWithoutID(String other) {
         throw new UnsupportedOperationException("Cannot assign values to FunctionParameter - values are computed from underlying Function");
+    }
+
+    /**
+     * Loggable implementation *
+     */
+    @Override
+    public void log(final long sample, final PrintStream out) {
+        final FunctionParameter var = (FunctionParameter) getCurrent();
+        final int values = var.getDimension();
+        for (int value = 0; value < values; value++) {
+            out.print(var.getArrayValue(value) + "\t");
+        }
     }
 
 }

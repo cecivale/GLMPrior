@@ -106,12 +106,35 @@ public class GLMDistribution extends ParametricDistribution {
         double eta = intercept.getValue();
         final Double[] beta = coefficients.getValues();
 
+        if (indicators !=null)
+            return computeLinearPredictor(eta, beta, indicators.getValues());
+
+        return computeLinearPredictor(eta, beta, null);
+
+//        for (int j = 0; j < p; j++) {
+//            double coefficient = beta[j];
+//
+//            // Apply indicator variable if provided (for variable selection)
+//            if (indicators != null) {
+//                boolean indicator = indicators.getValue(j);
+//                if (!indicator) {
+//                    coefficient = 0.0; // Exclude this variable if indicator is false
+//                }
+//            }
+//
+//            eta += coefficient * predictorValues[j];
+//        }
+//
+//        return eta;
+    }
+
+    private double computeLinearPredictor(double eta, Double[] beta, Boolean[] indicators) {
         for (int j = 0; j < p; j++) {
             double coefficient = beta[j];
 
             // Apply indicator variable if provided (for variable selection)
             if (indicators != null) {
-                boolean indicator = indicators.getValue(j);
+                boolean indicator = indicators[j];
                 if (!indicator) {
                     coefficient = 0.0; // Exclude this variable if indicator is false
                 }
@@ -128,6 +151,16 @@ public class GLMDistribution extends ParametricDistribution {
      */
     private double computeMean() {
         double eta = computeLinearPredictor();
+        double mu = LinkFunctions.inverse(link, eta);
+
+        // Validate that μ is in the valid domain for this distribution family
+        family.validateMean(mu);
+
+        return mu;
+    }
+
+    private double computeMean(Double intercept, Double[] coefficients, Boolean[] indicators) {
+        double eta = computeLinearPredictor(intercept, coefficients, indicators);
         double mu = LinkFunctions.inverse(link, eta);
 
         // Validate that μ is in the valid domain for this distribution family
@@ -197,6 +230,10 @@ public class GLMDistribution extends ParametricDistribution {
     // Convenience accessors
     public double getMean() {
         return computeMean();
+    }
+
+    public double getStoredMean() {
+        return computeMean(intercept.getStoredValues()[0], coefficients.getStoredValues(), indicators.getStoredValues());
     }
 
     public double getVariance() {

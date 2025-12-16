@@ -23,6 +23,10 @@
         <provider classname="glmprior.util.GLMLogger"/>
         <provider classname="glmprior.util.LinkFunction"/>
         <provider classname="glmprior.util.FunctionParameter"/>
+        <provider classname="glmprior.util.SingleIndexBooleanParameter"/>
+        <provider classname="glmprior.operator.SingleBactrianRandomWalkOperator"/>
+        <provider classname="glmprior.operator.GLMJointCoefficientParameterOperator"/>
+        <provider classname="glmprior.operator.GLMJointParameterOperator"/>
     </service>
 
     <service type="beastfx.app.inputeditor.InputEditor">
