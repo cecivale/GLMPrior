@@ -1,0 +1,20 @@
+<beast version='2.0'>
+
+    <mergewith point='parametricDistributions'>
+
+    <!-- Expression -->
+    <subtemplate id='GLMNormal' class='glmprior.util.GLMNormalDistribution' mainid='[top]'
+                 suppressInputs="glmprior.util.GLMNormalDistribution.predictors,
+                                    glmprior.util.GLMNormalDistribution.offset">
+    <![CDATA[
+    <distr spec="glmprior.util.GLMNormalDistribution">
+        <parameter name='intercept' value="0.0" estimate='false'/>
+        <parameter name='coefficients' dimension="1" value="0.0" estimate='false'/>
+        <parameter name='predictors' dimension="1" value="0.0" estimate='false'/>
+        <parameter name='sigma' value="1.0" lower="1e-12" estimate='false'/>
+    </distr>
+  ]]>
+    </subtemplate>
+
+    </mergewith>
+</beast>

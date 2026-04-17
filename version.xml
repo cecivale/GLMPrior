@@ -6,7 +6,6 @@
 
     <service type="beast.base.core.BEASTInterface">
         <provider classname="glmprior.util.GLMPrior"/>
-        <provider classname="glmprior.util.GLMPrior"/>
         <provider classname="glmprior.operator.ExtendedSwapOperator"/>
         <provider classname="glmprior.operator.RealRandomWalkOperator"/>
         <provider classname="glmprior.operator.BitFlipBSSVSOperator"/>
@@ -19,7 +18,14 @@
         <provider classname="glmprior.parameterization.GLMEpiParameterization"/>
         <provider classname="glmprior.util.GLMNormalDistribution"/>
         <provider classname="glmprior.util.GLMDistribution"/>
+        <provider classname="glmprior.util.MultiGLMDistribution"/>
+        <provider classname="glmprior.util.GLMLogger"/>
+        <provider classname="glmprior.util.LinkFunction"/>
         <provider classname="glmprior.util.FunctionParameter"/>
+        <provider classname="glmprior.util.SingleIndexBooleanParameter"/>
+        <provider classname="glmprior.operator.SingleBactrianRandomWalkOperator"/>
+        <provider classname="glmprior.operator.GLMJointCoefficientParameterOperator"/>
+        <provider classname="glmprior.operator.GLMJointParameterOperator"/>
     </service>
 
     <service type="beastfx.app.inputeditor.InputEditor">
