@@ -29,8 +29,8 @@ import java.util.List;
 public class MultiGLMDistribution extends ParametricDistribution {
 
     // Core GLM inputs
-    public Input<RealParameter> interceptInput = new Input<>(
-            "intercept", "GLM intercept (α) shared across all dimensions", Validate.REQUIRED);
+    public Input<RealParameter> baselineValueInput = new Input<>(
+            "baselineValue", "Baseline value on response scale (value when all coefficients/indicators are 0)", Validate.REQUIRED);
 
     public Input<RealParameter> coefficientsInput = new Input<>(
             "coefficients", "GLM coefficients β (dimension must match number of predictors)",
@@ -49,11 +49,20 @@ public class MultiGLMDistribution extends ParametricDistribution {
 
     // Distribution family and link function specification
     public Input<String> familyInput = new Input<>(
-            "family", "Distribution family (NORMAL, POISSON, BINOMIAL, GAMMA)", "NORMAL", Validate.OPTIONAL);
+            "family", "Distribution family (NORMAL, LOGNORMAL, LOGITNORMAL, POISSON, BINOMIAL, GAMMA)", "NORMAL", Validate.OPTIONAL);
 
     public Input<String> linkInput = new Input<>(
             "link", "Link function (IDENTITY, LOG, LOGIT, PROBIT, INVERSE, SQRT)", "IDENTITY",
             Validate.OPTIONAL);
+
+    // Predictor transformation options
+    public Input<Boolean> logTransformInput = new Input<>(
+            "logTransform", "Whether to log-transform the predictors using log(x + 1). Default false.",
+            false, Validate.OPTIONAL);
+
+    public Input<Boolean> standardizeInput = new Input<>(
+            "standardize", "Whether to standardize predictors (mean 0, sd 1) after transformation. Default false.",
+            false, Validate.OPTIONAL);
 
     // Distribution-specific parameters
     public Input<RealParameter> sigmaInput = new Input<>(
@@ -75,6 +84,9 @@ public class MultiGLMDistribution extends ParametricDistribution {
     private int numPredictors;
     private DistributionFamily family;
     private LinkFunction link;
+
+    // Transformed predictors (after log transform and/or standardization)
+    private List<Double[]> transformedPredictorValues;
 
     @Override
     public void initAndValidate() {
@@ -121,20 +133,22 @@ public class MultiGLMDistribution extends ParametricDistribution {
         // Validate distribution-specific parameters
         validateDistributionParameters();
 
+        // Transform predictors if requested (log transform and/or standardization)
+        transformedPredictorValues = transformPredictors(predictors);
+
         // Create GLMDistribution instances - one for each parameter dimension
         glmDistributions = new ArrayList<>(numDimensions);
 
         for (int i = 0; i < numDimensions; i++) {
-            // Extract predictor values for this dimension
+            // Extract predictor values for this dimension (already transformed)
             Double[] predictorValues = new Double[numPredictors];
             for (int j = 0; j < numPredictors; j++) {
-                predictorValues[j] = predictors.get(j).getArrayValue(i);
+                predictorValues[j] = transformedPredictorValues.get(j)[i];
             }
-
 
             // Create GLMDistribution for this dimension
             GLMDistribution dist = new GLMDistribution(
-                    interceptInput.get(),
+                    baselineValueInput.get(),
                     coefficientsInput.get(),
                     predictorValues,
                     indicatorsInput.get(),
@@ -154,6 +168,67 @@ public class MultiGLMDistribution extends ParametricDistribution {
     }
 
     /**
+     * Transforms predictors according to logTransform and standardize settings.
+     * Matches the transformation logic in GLMPrior.
+     *
+     * @param predictors List of predictor functions
+     * @return List of transformed predictor value arrays (one array per predictor)
+     */
+    private List<Double[]> transformPredictors(List<Function> predictors) {
+        List<Double[]> transformed = new ArrayList<>(numPredictors);
+
+        boolean doLogTransform = logTransformInput.get();
+        boolean doStandardize = standardizeInput.get();
+
+        for (int j = 0; j < numPredictors; j++) {
+            Double[] predT = new Double[numDimensions];
+            double mean = 0;
+            double sd = 0;
+
+            // First pass: extract values and optionally log transform
+            for (int i = 0; i < numDimensions; i++) {
+                double pred = predictors.get(j).getArrayValue(i);
+
+                if (doLogTransform) {
+                    if (pred < 0.0) {
+                        throw new IllegalArgumentException(
+                                "Predictor value should not be smaller than 0 to be log transformed. " +
+                                "Found " + pred + " at predictor " + j + ", index " + i);
+                    }
+                    pred = Math.log(pred + 1);
+                }
+                predT[i] = pred;
+                mean += pred;
+            }
+
+            // Second pass: standardize if requested
+            if (doStandardize) {
+                mean /= numDimensions;
+
+                // Calculate standard deviation
+                for (int i = 0; i < numDimensions; i++) {
+                    sd += (predT[i] - mean) * (predT[i] - mean);
+                }
+                sd = Math.sqrt(sd / numDimensions);
+
+                if (sd == 0.0) {
+                    throw new IllegalArgumentException(
+                            "Standard deviation of predictor " + j + " is zero, cannot standardize.");
+                }
+
+                // Apply standardization
+                for (int i = 0; i < numDimensions; i++) {
+                    predT[i] = (predT[i] - mean) / sd;
+                }
+            }
+
+            transformed.add(predT);
+        }
+
+        return transformed;
+    }
+
+    /**
      * Parses the family string and returns the DistributionFamily enum.
      */
     private DistributionFamily parseFamily(String familyStr) {
@@ -164,7 +239,7 @@ public class MultiGLMDistribution extends ParametricDistribution {
             return DistributionFamily.valueOf(familyStr.toUpperCase());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid family name: " + familyStr +
-                    ". Valid options: NORMAL, POISSON, BINOMIAL, GAMMA");
+                    ". Valid options: NORMAL, LOGNORMAL, LOGITNORMAL, POISSON, BINOMIAL, GAMMA");
         }
     }
 
@@ -202,6 +277,14 @@ public class MultiGLMDistribution extends ParametricDistribution {
         switch (family) {
             case NORMAL:
                 validateNormalParameters();
+                break;
+
+            case LOGNORMAL:
+                validateLogNormalParameters();
+                break;
+
+            case LOGITNORMAL:
+                validateLogitNormalParameters();
                 break;
 
             case POISSON:
@@ -257,6 +340,84 @@ public class MultiGLMDistribution extends ParametricDistribution {
             for (int i = 0; i < sigma2.getDimension(); i++) {
                 if (sigma2.getValue(i) <= 0.0) {
                     throw new IllegalArgumentException("Normal distribution: sigma2 must be > 0 (found " +
+                            sigma2.getValue(i) + " at index " + i + ")");
+                }
+            }
+        }
+    }
+
+    /**
+     * Validates parameters for LogNormal distribution.
+     * LogNormal uses sigma (on log scale) similar to Normal.
+     */
+    private void validateLogNormalParameters() {
+        boolean hasSigma = sigmaInput.get() != null;
+        boolean hasSigma2 = sigma2Input.get() != null;
+
+        if (!hasSigma && !hasSigma2) {
+            throw new IllegalArgumentException("LogNormal distribution requires either 'sigma' or 'sigma2' parameter (on log scale)");
+        }
+        if (hasSigma && hasSigma2) {
+            throw new IllegalArgumentException("LogNormal distribution: specify either 'sigma' or 'sigma2', not both");
+        }
+        if (nTrialsInput.get() != null || shapeInput.get() != null) {
+            throw new IllegalArgumentException("LogNormal distribution does not use nTrials or shape parameters");
+        }
+
+        // Validate values
+        if (hasSigma) {
+            RealParameter sigma = sigmaInput.get();
+            for (int i = 0; i < sigma.getDimension(); i++) {
+                if (sigma.getValue(i) <= 0.0) {
+                    throw new IllegalArgumentException("LogNormal distribution: sigma must be > 0 (found " +
+                            sigma.getValue(i) + " at index " + i + ")");
+                }
+            }
+        }
+        if (hasSigma2) {
+            RealParameter sigma2 = sigma2Input.get();
+            for (int i = 0; i < sigma2.getDimension(); i++) {
+                if (sigma2.getValue(i) <= 0.0) {
+                    throw new IllegalArgumentException("LogNormal distribution: sigma2 must be > 0 (found " +
+                            sigma2.getValue(i) + " at index " + i + ")");
+                }
+            }
+        }
+    }
+
+    /**
+     * Validates parameters for LogitNormal distribution.
+     * LogitNormal uses sigma (on logit scale) similar to Normal/LogNormal.
+     */
+    private void validateLogitNormalParameters() {
+        boolean hasSigma = sigmaInput.get() != null;
+        boolean hasSigma2 = sigma2Input.get() != null;
+
+        if (!hasSigma && !hasSigma2) {
+            throw new IllegalArgumentException("LogitNormal distribution requires either 'sigma' or 'sigma2' parameter (on logit scale)");
+        }
+        if (hasSigma && hasSigma2) {
+            throw new IllegalArgumentException("LogitNormal distribution: specify either 'sigma' or 'sigma2', not both");
+        }
+        if (nTrialsInput.get() != null || shapeInput.get() != null) {
+            throw new IllegalArgumentException("LogitNormal distribution does not use nTrials or shape parameters");
+        }
+
+        // Validate values
+        if (hasSigma) {
+            RealParameter sigma = sigmaInput.get();
+            for (int i = 0; i < sigma.getDimension(); i++) {
+                if (sigma.getValue(i) <= 0.0) {
+                    throw new IllegalArgumentException("LogitNormal distribution: sigma must be > 0 (found " +
+                            sigma.getValue(i) + " at index " + i + ")");
+                }
+            }
+        }
+        if (hasSigma2) {
+            RealParameter sigma2 = sigma2Input.get();
+            for (int i = 0; i < sigma2.getDimension(); i++) {
+                if (sigma2.getValue(i) <= 0.0) {
+                    throw new IllegalArgumentException("LogitNormal distribution: sigma2 must be > 0 (found " +
                             sigma2.getValue(i) + " at index " + i + ")");
                 }
             }

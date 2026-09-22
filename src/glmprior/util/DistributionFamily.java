@@ -7,11 +7,11 @@ package glmprior.util;
 public enum DistributionFamily {
     /**
      * Normal (Gaussian) distribution.
-     * Domain: μ ∈ ℝ
+     * Domain: real numbers
      * Canonical link: Identity
-     * Additional parameters: σ (standard deviation)
+     * Additional parameters: sigma (standard deviation)
      */
-    NORMAL("Normal", "μ ∈ ℝ", "σ > 0"),
+    NORMAL("Normal", "mu: (-inf, inf)", "sigma > 0"),
     
     /**
      * Poisson distribution.
@@ -36,11 +36,32 @@ public enum DistributionFamily {
      * Additional parameters: shape parameter
      */
     GAMMA("Gamma", "μ > 0", "shape > 0"),
-    
+
     /**
-     * Note: Additional distribution families like Inverse Gaussian and Negative Binomial
-     * can be added in the future with custom implementations.
-     */;
+     * Log-Normal distribution.
+     * Domain: μ > 0 (the mean of the underlying normal is log(μ))
+     * Canonical link: Log (since we model log(Y) ~ Normal)
+     * Additional parameters: σ (standard deviation on log scale)
+     *
+     * This models: log(Y) ~ Normal(η, σ) where η is the linear predictor.
+     * Equivalently: Y ~ LogNormal(η, σ)
+     *
+     * This matches the error structure in GLMPrior when using log link with error terms.
+     */
+    LOGNORMAL("LogNormal", "μ > 0", "σ > 0 (on log scale)"),
+
+    /**
+     * Logit-Normal distribution.
+     * Domain: μ ∈ (0, 1) (the mean of the underlying normal is logit(μ))
+     * Canonical link: Logit (since we model logit(Y) ~ Normal)
+     * Additional parameters: σ (standard deviation on logit scale)
+     *
+     * This models: logit(Y) ~ Normal(η, σ) where η is the linear predictor.
+     * The output Y is constrained to (0, 1).
+     *
+     * This matches the error structure in GLMPrior when using logit link with error terms.
+     */
+    LOGITNORMAL("LogitNormal", "μ ∈ (0,1)", "σ > 0 (on logit scale)");
     
     private final String displayName;
     private final String domain;
@@ -77,6 +98,10 @@ public enum DistributionFamily {
                 return LinkFunction.LOGIT;
             case GAMMA:
                 return LinkFunction.INVERSE;
+            case LOGNORMAL:
+                return LinkFunction.LOG;
+            case LOGITNORMAL:
+                return LinkFunction.LOGIT;
             default:
                 throw new IllegalStateException("No canonical link defined for " + this);
         }
@@ -95,6 +120,14 @@ public enum DistributionFamily {
                 return link == LinkFunction.LOGIT || link == LinkFunction.PROBIT || link == LinkFunction.IDENTITY;
             case GAMMA:
                 return link == LinkFunction.INVERSE || link == LinkFunction.LOG || link == LinkFunction.IDENTITY;
+            case LOGNORMAL:
+                // LogNormal naturally uses log link (models log(Y) ~ Normal)
+                // Identity link would mean Y ~ LogNormal(μ, σ) directly
+                return link == LinkFunction.LOG || link == LinkFunction.IDENTITY;
+            case LOGITNORMAL:
+                // LogitNormal naturally uses logit link (models logit(Y) ~ Normal)
+                // Identity link would mean Y ~ LogitNormal(μ, σ) directly
+                return link == LinkFunction.LOGIT || link == LinkFunction.IDENTITY;
             default:
                 return false;
         }
@@ -115,6 +148,7 @@ public enum DistributionFamily {
                 break;
             case POISSON:
             case GAMMA:
+            case LOGNORMAL:
                 // μ > 0
                 if (mu <= 0.0 || !Double.isFinite(mu)) {
                     throw new IllegalArgumentException(getDisplayName() + " distribution mean must be > 0, got: " + mu);
@@ -124,6 +158,12 @@ public enum DistributionFamily {
                 // μ ∈ [0,1] (interpreted as probability p)
                 if (mu < 0.0 || mu > 1.0 || !Double.isFinite(mu)) {
                     throw new IllegalArgumentException("Binomial distribution probability must be in [0,1], got: " + mu);
+                }
+                break;
+            case LOGITNORMAL:
+                // μ ∈ (0,1) - strict inequality since logit is undefined at 0 and 1
+                if (mu <= 0.0 || mu >= 1.0 || !Double.isFinite(mu)) {
+                    throw new IllegalArgumentException("LogitNormal distribution mean must be in (0,1), got: " + mu);
                 }
                 break;
             default:

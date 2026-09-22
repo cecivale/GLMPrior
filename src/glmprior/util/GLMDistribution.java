@@ -14,7 +14,7 @@ import org.apache.commons.math.distribution.BinomialDistributionImpl;
 /**
  * A generalized GLM-driven parametric distribution that supports multiple distribution families
  * and link functions. The mean parameter is modeled as:
- *   η = intercept + sum_j beta[j] * X[j]  (linear predictor)
+ *   η = g(baselineValue) + sum_j beta[j] * X[j]  (linear predictor)
  *   μ = g^(-1)(η)  (mean via inverse link function)
  *   y | μ, θ ~ Family(μ, θ)  (response from specified family with additional parameters θ)
  *
@@ -27,7 +27,7 @@ import org.apache.commons.math.distribution.BinomialDistributionImpl;
 public class GLMDistribution extends ParametricDistribution {
 
     // Core GLM fields
-    private RealParameter intercept;
+    private RealParameter baselineValue;
     private RealParameter coefficients;
     private Double[] predictorValues;
     private BooleanParameter indicators;
@@ -49,7 +49,7 @@ public class GLMDistribution extends ParametricDistribution {
      * Programmatic constructor for creating GLMDistribution instances.
      * Validation of parameters should be done in MultiGLMDistribution before calling this constructor.
      *
-     * @param intercept GLM intercept parameter
+     * @param baselineValue Baseline value on response scale (value when all predictors are 0)
      * @param coefficients GLM coefficients
      * @param predictorValues Predictor values (one value per coefficient)
      * @param indicators Optional indicators for variable selection
@@ -60,7 +60,7 @@ public class GLMDistribution extends ParametricDistribution {
      * @param nTrials Number of trials for Binomial distribution (optional)
      * @param shape Shape parameter for Gamma distribution (optional)
      */
-    public GLMDistribution(RealParameter intercept,
+    public GLMDistribution(RealParameter baselineValue,
                           RealParameter coefficients,
                           Double[] predictorValues,
                           BooleanParameter indicators,
@@ -72,7 +72,7 @@ public class GLMDistribution extends ParametricDistribution {
                           RealParameter shape) {
         super();
 
-        this.intercept = intercept;
+        this.baselineValue = baselineValue;
         this.coefficients = coefficients;
         this.predictorValues = predictorValues;
         this.indicators = indicators;
@@ -99,11 +99,16 @@ public class GLMDistribution extends ParametricDistribution {
     }
 
     /**
-     * Computes the linear predictor η = α + Σ(γⱼ * βⱼ * xⱼ)
-     * where γⱼ are the binary indicators (if provided) for variable selection.
+     * Computes the linear predictor η = g(baseline) + Σ(γⱼ * βⱼ * xⱼ)
+     * where γⱼ are the binary indicators (if provided) for variable selection,
+     * and g() is the link function applied to the baseline value.
+     *
+     * The baselineValue parameter is treated as the baseline value on the response scale,
+     * so the link function is applied to convert it to the linear predictor scale.
      */
     private double computeLinearPredictor() {
-        double eta = intercept.getValue();
+        // Apply link function to baseline value to get intercept on linear predictor scale
+        double eta = LinkFunctions.apply(link, baselineValue.getValue());
         final Double[] beta = coefficients.getValues();
 
         if (indicators !=null)
@@ -159,8 +164,10 @@ public class GLMDistribution extends ParametricDistribution {
         return mu;
     }
 
-    private double computeMean(Double intercept, Double[] coefficients, Boolean[] indicators) {
-        double eta = computeLinearPredictor(intercept, coefficients, indicators);
+    private double computeMean(Double baselineValue, Double[] coefficients, Boolean[] indicators) {
+        // Apply link function to baseline value to get intercept on linear predictor scale
+        double interceptOnEtaScale = LinkFunctions.apply(link, baselineValue);
+        double eta = computeLinearPredictor(interceptOnEtaScale, coefficients, indicators);
         double mu = LinkFunctions.inverse(link, eta);
 
         // Validate that μ is in the valid domain for this distribution family
@@ -172,6 +179,8 @@ public class GLMDistribution extends ParametricDistribution {
     /**
      * Creates the appropriate Apache Commons Math distribution object.
      * Returns the proper Distribution type (continuous or discrete).
+     *
+     * Note: LogNormal is not supported via this method - use logDensity() directly.
      */
     @Override
     public Distribution getDistribution() {
@@ -195,9 +204,107 @@ public class GLMDistribution extends ParametricDistribution {
                 double rate = shapeValue / mu; // rate = shape / mean
                 return new GammaDistributionImpl(shapeValue, 1.0 / rate); // Commons Math uses scale = 1/rate
 
+            case LOGNORMAL:
+                // LogNormal doesn't have a direct Commons Math impl in the old package.
+                // Return a Normal distribution on the log scale for compatibility,
+                // but logDensity() should be used for proper calculations.
+                double logMu = computeLinearPredictor(); // η = log-scale mean
+                return new NormalDistributionImpl(logMu, getSigmaValue());
+
+            case LOGITNORMAL:
+                // LogitNormal doesn't have a Commons Math impl.
+                // Return a Normal distribution on the logit scale for compatibility,
+                // but logDensity() should be used for proper calculations.
+                double logitMu = computeLinearPredictor(); // η = logit-scale mean
+                return new NormalDistributionImpl(logitMu, getSigmaValue());
+
             default:
                 throw new IllegalStateException("Distribution creation not implemented for " + family);
         }
+    }
+
+    /**
+     * Computes the log density for the given value.
+     * Overridden to provide proper LogNormal and LogitNormal support.
+     */
+    @Override
+    public double logDensity(double x) {
+        if (family == DistributionFamily.LOGNORMAL) {
+            return logNormalLogDensity(x);
+        }
+        if (family == DistributionFamily.LOGITNORMAL) {
+            return logitNormalLogDensity(x);
+        }
+        // For other families, use the parent implementation
+        return super.logDensity(x);
+    }
+
+    /**
+     * Computes log density for LogNormal distribution.
+     * LogNormal(μ, σ) where log(Y) ~ Normal(μ, σ).
+     *
+     * For our GLM with log link:
+     *   η = log(baseline) + β·X  (linear predictor = log-scale mean)
+     *   log(Y) ~ Normal(η, σ)
+     *
+     * log f(y) = -log(y) - log(σ) - 0.5*log(2π) - 0.5*((log(y) - η)/σ)²
+     */
+    private double logNormalLogDensity(double y) {
+        if (y <= 0) {
+            return Double.NEGATIVE_INFINITY;
+        }
+
+        double eta = computeLinearPredictor(); // log-scale mean
+        double sigmaValue = getSigmaValue();
+        double logY = Math.log(y);
+        double z = (logY - eta) / sigmaValue;
+
+        // log f(y) = -log(y) - log(σ) - 0.5*log(2π) - 0.5*z²
+        return -logY - Math.log(sigmaValue) - 0.5 * Math.log(2 * Math.PI) - 0.5 * z * z;
+    }
+
+    /**
+     * Computes log density for LogitNormal distribution.
+     * LogitNormal(μ, σ) where logit(Y) ~ Normal(μ, σ).
+     *
+     * For our GLM with logit link:
+     *   η = logit(baseline) + β·X  (linear predictor = logit-scale mean)
+     *   logit(Y) ~ Normal(η, σ)
+     *
+     * The PDF of LogitNormal is:
+     *   f(y) = (1 / (σ * sqrt(2π))) * (1 / (y * (1-y))) * exp(-0.5 * ((logit(y) - η) / σ)²)
+     *
+     * log f(y) = -log(σ) - 0.5*log(2π) - log(y) - log(1-y) - 0.5*((logit(y) - η)/σ)²
+     */
+    private double logitNormalLogDensity(double y) {
+        if (y <= 0 || y >= 1) {
+            return Double.NEGATIVE_INFINITY;
+        }
+
+        double eta = computeLinearPredictor(); // logit-scale mean
+        double sigmaValue = getSigmaValue();
+        double logitY = Math.log(y / (1.0 - y)); // logit(y)
+        double z = (logitY - eta) / sigmaValue;
+
+        // log f(y) = -log(σ) - 0.5*log(2π) - log(y) - log(1-y) - 0.5*z²
+        // The Jacobian term is 1/(y*(1-y)) which gives -log(y) - log(1-y) in log space
+        return -Math.log(sigmaValue) - 0.5 * Math.log(2 * Math.PI)
+               - Math.log(y) - Math.log(1.0 - y) - 0.5 * z * z;
+    }
+
+    /**
+     * Computes the density for the given value.
+     * Overridden to provide proper LogNormal and LogitNormal support.
+     */
+    @Override
+    public double density(double x) {
+        if (family == DistributionFamily.LOGNORMAL) {
+            return Math.exp(logNormalLogDensity(x));
+        }
+        if (family == DistributionFamily.LOGITNORMAL) {
+            return Math.exp(logitNormalLogDensity(x));
+        }
+        return super.density(x);
     }
 
     /**
@@ -233,7 +340,7 @@ public class GLMDistribution extends ParametricDistribution {
     }
 
     public double getStoredMean() {
-        return computeMean(intercept.getStoredValues()[0], coefficients.getStoredValues(), indicators.getStoredValues());
+        return computeMean(baselineValue.getStoredValues()[0], coefficients.getStoredValues(), indicators.getStoredValues());
     }
 
     public double getVariance() {
@@ -251,6 +358,23 @@ public class GLMDistribution extends ParametricDistribution {
                 double mu = computeMean();
                 double shapeValue = shape.getValue();
                 return mu * mu / shapeValue; // For Gamma: var = μ²/shape
+            case LOGNORMAL:
+                // For LogNormal where log(Y) ~ Normal(η, σ):
+                // Var(Y) = (exp(σ²) - 1) * exp(2η + σ²)
+                double etaLN = computeLinearPredictor();
+                double sigmaLN = getSigmaValue();
+                double sigma2LN = sigmaLN * sigmaLN;
+                return (Math.exp(sigma2LN) - 1) * Math.exp(2 * etaLN + sigma2LN);
+            case LOGITNORMAL:
+                // For LogitNormal where logit(Y) ~ Normal(η, σ):
+                // No closed-form variance. Using delta method approximation:
+                // Var(Y) ≈ (dμ/dη)² * σ² where μ = logit⁻¹(η)
+                // dμ/dη = exp(η)/(1+exp(η))² = μ(1-μ)
+                double etaLGN = computeLinearPredictor();
+                double sigmaLGN = getSigmaValue();
+                double muLGN = 1.0 / (1.0 + Math.exp(-etaLGN)); // logit⁻¹(η)
+                double derivLGN = muLGN * (1.0 - muLGN); // Jacobian
+                return derivLGN * derivLGN * sigmaLGN * sigmaLGN;
             default:
                 throw new UnsupportedOperationException("Variance calculation not implemented for " + family);
         }

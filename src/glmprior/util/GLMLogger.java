@@ -92,8 +92,8 @@ public class GLMLogger extends CalculationNode implements Loggable {
 
         MultiGLMDistribution distr = distributionInput.get();
 
-        // baseline (intercept)
-        out.print(LinkFunctions.inverse(LinkFunction.valueOf(distr.linkInput.get()), distr.interceptInput.get().getValue()) + "\t");
+        // baseline - already on response scale, log directly
+        out.print(distr.baselineValueInput.get().getValue() + "\t");
 
         // coefficients where indicators == 1, 0 otherwise
         for (int i = 0; i < coeffDim; i++) {
