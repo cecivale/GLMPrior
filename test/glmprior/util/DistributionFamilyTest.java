@@ -198,22 +198,22 @@ public class DistributionFamilyTest {
     @Test
     public void testDomainStrings() {
         // Test that domain strings match expectations
-        assertEquals("Normal domain", "μ ∈ ℝ", DistributionFamily.NORMAL.getDomain());
-        assertEquals("Poisson domain", "λ > 0", DistributionFamily.POISSON.getDomain());
-        assertEquals("Binomial domain", "p ∈ [0,1]", DistributionFamily.BINOMIAL.getDomain());
-        assertEquals("Gamma domain", "μ > 0", DistributionFamily.GAMMA.getDomain());
-        assertEquals("Inverse Gaussian domain", "μ > 0", DistributionFamily.INVERSE_GAUSSIAN.getDomain());
-        assertEquals("Negative Binomial domain", "μ > 0", DistributionFamily.NEGATIVE_BINOMIAL.getDomain());
+        assertEquals("Normal domain", "mu in (-inf, inf)", DistributionFamily.NORMAL.getDomain());
+        assertEquals("Poisson domain", "lambda > 0", DistributionFamily.POISSON.getDomain());
+        assertEquals("Binomial domain", "p in [0,1]", DistributionFamily.BINOMIAL.getDomain());
+        assertEquals("Gamma domain", "mu > 0", DistributionFamily.GAMMA.getDomain());
+        assertEquals("Inverse Gaussian domain", "mu > 0", DistributionFamily.INVERSE_GAUSSIAN.getDomain());
+        assertEquals("Negative Binomial domain", "mu > 0", DistributionFamily.NEGATIVE_BINOMIAL.getDomain());
     }
 
     @Test
     public void testAdditionalParameterStrings() {
         // Test additional parameter requirements
-        assertEquals("Normal additional params", "σ > 0", DistributionFamily.NORMAL.getAdditionalParameters());
+        assertEquals("Normal additional params", "sigma > 0", DistributionFamily.NORMAL.getAdditionalParameters());
         assertEquals("Poisson additional params", "none", DistributionFamily.POISSON.getAdditionalParameters());
-        assertEquals("Binomial additional params", "n ≥ 1 (trials)", DistributionFamily.BINOMIAL.getAdditionalParameters());
+        assertEquals("Binomial additional params", "n >= 1 (trials)", DistributionFamily.BINOMIAL.getAdditionalParameters());
         assertEquals("Gamma additional params", "shape > 0", DistributionFamily.GAMMA.getAdditionalParameters());
-        assertEquals("Inverse Gaussian additional params", "λ > 0 (shape)", 
+        assertEquals("Inverse Gaussian additional params", "lambda > 0 (shape)", 
                 DistributionFamily.INVERSE_GAUSSIAN.getAdditionalParameters());
         assertEquals("Negative Binomial additional params", "size > 0", 
                 DistributionFamily.NEGATIVE_BINOMIAL.getAdditionalParameters());

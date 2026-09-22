@@ -17,12 +17,12 @@ import java.text.DecimalFormat;
  *
  * This operator solves the problem of poor mixing when the parameter y is tightly
  * constrained by the GLM prior (e.g., Normal with small sigma). By updating both
- * the coefficient and y together, it maintains y ≈ μ where μ = g^(-1)(α + Σ(β*X)).
+ * the coefficient and y together, it maintains y ~= mu where mu = g^(-1)(alpha + sum(beta*X)).
  *
  * The coupling is deterministic and reversible:
- *   - Propose Δβ for coefficient β[i]
- *   - Compute induced change in means: Δμ[j] = μ_new[j] - μ_old[j]
- *   - Update parameter: y[j] := y[j] + Δμ[j]
+ *   - Propose delta_beta for coefficient beta[i]
+ *   - Compute induced change in means: delta_mu[j] = mu_new[j] - mu_old[j]
+ *   - Update parameter: y[j] := y[j] + delta_mu[j]
  *
  * This maintains proper MCMC reversibility (Hastings ratio = 1.0) and dramatically
  * improves acceptance rates when sigma is small.

@@ -108,8 +108,8 @@ public class GLMIndicatorTest {
         
         glm.initAndValidate();
         
-        // Linear predictor: η = 1.0 + 2.0*1.0 + 0*3.0*1.0 + 4.0*1.0 = 7.0
-        // Mean with log link: μ = exp(7.0)
+        // Linear predictor: eta = 1.0 + 2.0*1.0 + 0*3.0*1.0 + 4.0*1.0 = 7.0
+        // Mean with log link: mu = exp(7.0)
         double expectedMean = Math.exp(7.0);
         assertEquals("GLM with indicators and log link", expectedMean, glm.getMean(), 1e-8);
     }
@@ -128,8 +128,8 @@ public class GLMIndicatorTest {
         assertEquals("Should use Gamma family", DistributionFamily.GAMMA, glm.getFamily());
         assertEquals("Should use canonical inverse link", LinkFunction.INVERSE, glm.getLink());
         
-        // Linear predictor: η = 1.0 + 0*2.0*1.0 + 3.0*1.0 + 0*4.0*1.0 = 4.0
-        // Mean with inverse link: μ = 1/4.0 = 0.25
+        // Linear predictor: eta = 1.0 + 0*2.0*1.0 + 3.0*1.0 + 0*4.0*1.0 = 4.0
+        // Mean with inverse link: mu = 1/4.0 = 0.25
         double expectedMean = 0.25;
         assertEquals("GLM with indicators and Gamma distribution", expectedMean, glm.getMean(), 1e-10);
     }
@@ -197,7 +197,7 @@ public class GLMIndicatorTest {
         
         glm.initAndValidate();
         
-        // After standardization, predictors should have mean ≈ 0
+        // After standardization, predictors should have mean ~= 0
         // The exact value depends on standardization, but the logic should work
         double mean = glm.getMean();
         assertTrue("Should compute finite mean with standardization", Double.isFinite(mean));

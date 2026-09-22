@@ -14,9 +14,9 @@ import org.apache.commons.math.distribution.BinomialDistributionImpl;
 /**
  * A generalized GLM-driven parametric distribution that supports multiple distribution families
  * and link functions. The mean parameter is modeled as:
- *   η = g(baselineValue) + sum_j beta[j] * X[j]  (linear predictor)
- *   μ = g^(-1)(η)  (mean via inverse link function)
- *   y | μ, θ ~ Family(μ, θ)  (response from specified family with additional parameters θ)
+ *   eta = g(baselineValue) + sum_j beta[j] * X[j]  (linear predictor)
+ *   mu = g^(-1)(eta)  (mean via inverse link function)
+ *   y | mu, theta ~ Family(mu, theta)  (response from specified family with additional parameters theta)
  *
  * Supports: Normal, Poisson, Binomial, and Gamma distributions
  * with various link functions (identity, log, logit, probit, inverse, sqrt).
@@ -99,8 +99,8 @@ public class GLMDistribution extends ParametricDistribution {
     }
 
     /**
-     * Computes the linear predictor η = g(baseline) + Σ(γⱼ * βⱼ * xⱼ)
-     * where γⱼ are the binary indicators (if provided) for variable selection,
+     * Computes the linear predictor eta = g(baseline) + sum_j(gamma_j * beta_j * x_j)
+     * where gamma_j are the binary indicators (if provided) for variable selection,
      * and g() is the link function applied to the baseline value.
      *
      * The baselineValue parameter is treated as the baseline value on the response scale,
@@ -152,13 +152,13 @@ public class GLMDistribution extends ParametricDistribution {
     }
 
     /**
-     * Computes the mean parameter μ = g^(-1)(η) using the inverse link function
+     * Computes the mean parameter mu = g^(-1)(eta) using the inverse link function
      */
     private double computeMean() {
         double eta = computeLinearPredictor();
         double mu = LinkFunctions.inverse(link, eta);
 
-        // Validate that μ is in the valid domain for this distribution family
+        // Validate that mu is in the valid domain for this distribution family
         family.validateMean(mu);
 
         return mu;
@@ -170,7 +170,7 @@ public class GLMDistribution extends ParametricDistribution {
         double eta = computeLinearPredictor(interceptOnEtaScale, coefficients, indicators);
         double mu = LinkFunctions.inverse(link, eta);
 
-        // Validate that μ is in the valid domain for this distribution family
+        // Validate that mu is in the valid domain for this distribution family
         family.validateMean(mu);
 
         return mu;
@@ -208,14 +208,14 @@ public class GLMDistribution extends ParametricDistribution {
                 // LogNormal doesn't have a direct Commons Math impl in the old package.
                 // Return a Normal distribution on the log scale for compatibility,
                 // but logDensity() should be used for proper calculations.
-                double logMu = computeLinearPredictor(); // η = log-scale mean
+                double logMu = computeLinearPredictor(); // eta = log-scale mean
                 return new NormalDistributionImpl(logMu, getSigmaValue());
 
             case LOGITNORMAL:
                 // LogitNormal doesn't have a Commons Math impl.
                 // Return a Normal distribution on the logit scale for compatibility,
                 // but logDensity() should be used for proper calculations.
-                double logitMu = computeLinearPredictor(); // η = logit-scale mean
+                double logitMu = computeLinearPredictor(); // eta = logit-scale mean
                 return new NormalDistributionImpl(logitMu, getSigmaValue());
 
             default:
@@ -241,13 +241,13 @@ public class GLMDistribution extends ParametricDistribution {
 
     /**
      * Computes log density for LogNormal distribution.
-     * LogNormal(μ, σ) where log(Y) ~ Normal(μ, σ).
+     * LogNormal(mu, sigma) where log(Y) ~ Normal(mu, sigma).
      *
      * For our GLM with log link:
-     *   η = log(baseline) + β·X  (linear predictor = log-scale mean)
-     *   log(Y) ~ Normal(η, σ)
+     *   eta = log(baseline) + beta*X  (linear predictor = log-scale mean)
+     *   log(Y) ~ Normal(eta, sigma)
      *
-     * log f(y) = -log(y) - log(σ) - 0.5*log(2π) - 0.5*((log(y) - η)/σ)²
+     * log f(y) = -log(y) - log(sigma) - 0.5*log(2*pi) - 0.5*((log(y) - eta)/sigma)^2
      */
     private double logNormalLogDensity(double y) {
         if (y <= 0) {
@@ -259,22 +259,22 @@ public class GLMDistribution extends ParametricDistribution {
         double logY = Math.log(y);
         double z = (logY - eta) / sigmaValue;
 
-        // log f(y) = -log(y) - log(σ) - 0.5*log(2π) - 0.5*z²
+        // log f(y) = -log(y) - log(sigma) - 0.5*log(2*pi) - 0.5*z^2
         return -logY - Math.log(sigmaValue) - 0.5 * Math.log(2 * Math.PI) - 0.5 * z * z;
     }
 
     /**
      * Computes log density for LogitNormal distribution.
-     * LogitNormal(μ, σ) where logit(Y) ~ Normal(μ, σ).
+     * LogitNormal(mu, sigma) where logit(Y) ~ Normal(mu, sigma).
      *
      * For our GLM with logit link:
-     *   η = logit(baseline) + β·X  (linear predictor = logit-scale mean)
-     *   logit(Y) ~ Normal(η, σ)
+     *   eta = logit(baseline) + beta*X  (linear predictor = logit-scale mean)
+     *   logit(Y) ~ Normal(eta, sigma)
      *
      * The PDF of LogitNormal is:
-     *   f(y) = (1 / (σ * sqrt(2π))) * (1 / (y * (1-y))) * exp(-0.5 * ((logit(y) - η) / σ)²)
+     *   f(y) = (1 / (sigma * sqrt(2*pi))) * (1 / (y * (1-y))) * exp(-0.5 * ((logit(y) - eta) / sigma)^2)
      *
-     * log f(y) = -log(σ) - 0.5*log(2π) - log(y) - log(1-y) - 0.5*((logit(y) - η)/σ)²
+     * log f(y) = -log(sigma) - 0.5*log(2*pi) - log(y) - log(1-y) - 0.5*((logit(y) - eta)/sigma)^2
      */
     private double logitNormalLogDensity(double y) {
         if (y <= 0 || y >= 1) {
@@ -286,7 +286,7 @@ public class GLMDistribution extends ParametricDistribution {
         double logitY = Math.log(y / (1.0 - y)); // logit(y)
         double z = (logitY - eta) / sigmaValue;
 
-        // log f(y) = -log(σ) - 0.5*log(2π) - log(y) - log(1-y) - 0.5*z²
+        // log f(y) = -log(sigma) - 0.5*log(2*pi) - log(y) - log(1-y) - 0.5*z^2
         // The Jacobian term is 1/(y*(1-y)) which gives -log(y) - log(1-y) in log space
         return -Math.log(sigmaValue) - 0.5 * Math.log(2 * Math.PI)
                - Math.log(y) - Math.log(1.0 - y) - 0.5 * z * z;
@@ -357,22 +357,22 @@ public class GLMDistribution extends ParametricDistribution {
             case GAMMA:
                 double mu = computeMean();
                 double shapeValue = shape.getValue();
-                return mu * mu / shapeValue; // For Gamma: var = μ²/shape
+                return mu * mu / shapeValue; // For Gamma: var = mu^2/shape
             case LOGNORMAL:
-                // For LogNormal where log(Y) ~ Normal(η, σ):
-                // Var(Y) = (exp(σ²) - 1) * exp(2η + σ²)
+                // For LogNormal where log(Y) ~ Normal(eta, sigma):
+                // Var(Y) = (exp(sigma^2) - 1) * exp(2*eta + sigma^2)
                 double etaLN = computeLinearPredictor();
                 double sigmaLN = getSigmaValue();
                 double sigma2LN = sigmaLN * sigmaLN;
                 return (Math.exp(sigma2LN) - 1) * Math.exp(2 * etaLN + sigma2LN);
             case LOGITNORMAL:
-                // For LogitNormal where logit(Y) ~ Normal(η, σ):
+                // For LogitNormal where logit(Y) ~ Normal(eta, sigma):
                 // No closed-form variance. Using delta method approximation:
-                // Var(Y) ≈ (dμ/dη)² * σ² where μ = logit⁻¹(η)
-                // dμ/dη = exp(η)/(1+exp(η))² = μ(1-μ)
+                // Var(Y) ~= (d(mu)/d(eta))^2 * sigma^2 where mu = logit^(-1)(eta)
+                // d(mu)/d(eta) = exp(eta)/(1+exp(eta))^2 = mu(1-mu)
                 double etaLGN = computeLinearPredictor();
                 double sigmaLGN = getSigmaValue();
-                double muLGN = 1.0 / (1.0 + Math.exp(-etaLGN)); // logit⁻¹(η)
+                double muLGN = 1.0 / (1.0 + Math.exp(-etaLGN)); // logit^(-1)(eta)
                 double derivLGN = muLGN * (1.0 - muLGN); // Jacobian
                 return derivLGN * derivLGN * sigmaLGN * sigmaLGN;
             default:

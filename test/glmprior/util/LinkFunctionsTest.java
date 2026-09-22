@@ -110,14 +110,14 @@ public class LinkFunctionsTest {
             LinkFunctions.apply(LinkFunction.LOG, 0.0);
             fail("Should have thrown exception for mu = 0 with log link");
         } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("Log link requires μ > 0"));
+            assertTrue(e.getMessage().contains("Log link requires mu > 0"));
         }
 
         try {
             LinkFunctions.apply(LinkFunction.LOG, -1.0);
             fail("Should have thrown exception for mu < 0 with log link");
         } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("Log link requires μ > 0"));
+            assertTrue(e.getMessage().contains("Log link requires mu > 0"));
         }
 
         // Test domain validation for logit link (0 < mu < 1)
@@ -125,21 +125,21 @@ public class LinkFunctionsTest {
             LinkFunctions.apply(LinkFunction.LOGIT, 0.0);
             fail("Should have thrown exception for mu = 0 with logit link");
         } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("Logit link requires μ ∈ (0,1)"));
+            assertTrue(e.getMessage().contains("Logit link requires mu in (0,1)"));
         }
 
         try {
             LinkFunctions.apply(LinkFunction.LOGIT, 1.0);
             fail("Should have thrown exception for mu = 1 with logit link");
         } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("Logit link requires μ ∈ (0,1)"));
+            assertTrue(e.getMessage().contains("Logit link requires mu in (0,1)"));
         }
 
         try {
             LinkFunctions.apply(LinkFunction.LOGIT, 1.5);
             fail("Should have thrown exception for mu > 1 with logit link");
         } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("Logit link requires μ ∈ (0,1)"));
+            assertTrue(e.getMessage().contains("Logit link requires mu in (0,1)"));
         }
     }
 
@@ -210,7 +210,7 @@ public class LinkFunctionsTest {
             LinkFunctions.inverse(LinkFunction.INVERSE, 0.0);
             fail("Should reject eta = 0 for inverse link");
         } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("Cannot compute 1/η"));
+            assertTrue(e.getMessage().contains("Cannot compute 1/eta"));
         }
 
         // Test negative eta for sqrt inverse
@@ -218,7 +218,7 @@ public class LinkFunctionsTest {
             LinkFunctions.inverse(LinkFunction.SQRT, -1.0);
             fail("Should reject negative eta for sqrt link");
         } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("Square root link requires η ≥ 0"));
+            assertTrue(e.getMessage().contains("Square root link requires eta >= 0"));
         }
     }
 }

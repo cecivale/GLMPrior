@@ -33,7 +33,7 @@ public class MultiGLMDistribution extends ParametricDistribution {
             "baselineValue", "Baseline value on response scale (value when all coefficients/indicators are 0)", Validate.REQUIRED);
 
     public Input<RealParameter> coefficientsInput = new Input<>(
-            "coefficients", "GLM coefficients β (dimension must match number of predictors)",
+            "coefficients", "GLM coefficients beta (dimension must match number of predictors)",
             Validate.REQUIRED);
 
     public Input<List<Function>> predictorsInput = new Input<>(
@@ -66,13 +66,13 @@ public class MultiGLMDistribution extends ParametricDistribution {
 
     // Distribution-specific parameters
     public Input<RealParameter> sigmaInput = new Input<>(
-            "sigma", "Standard deviation σ for Normal distribution (>0)", Validate.OPTIONAL);
+            "sigma", "Standard deviation sigma for Normal distribution (>0)", Validate.OPTIONAL);
 
     public Input<RealParameter> sigma2Input = new Input<>(
-            "sigma2", "Variance σ² for Normal distribution (>0)", Validate.OPTIONAL);
+            "sigma2", "Variance sigma^2 for Normal distribution (>0)", Validate.OPTIONAL);
 
     public Input<RealParameter> nTrialsInput = new Input<>(
-            "nTrials", "Number of trials n for Binomial distribution (≥1)", Validate.OPTIONAL);
+            "nTrials", "Number of trials n for Binomial distribution (>=1)", Validate.OPTIONAL);
 
     public Input<RealParameter> shapeInput = new Input<>(
             "shape", "Shape parameter for Gamma distribution (>0)",
@@ -438,7 +438,7 @@ public class MultiGLMDistribution extends ParametricDistribution {
         RealParameter nTrials = nTrialsInput.get();
         for (int i = 0; i < nTrials.getDimension(); i++) {
             if (nTrials.getValue(i) < 1) {
-                throw new IllegalArgumentException("Binomial distribution: nTrials must be ≥ 1 (found " +
+                throw new IllegalArgumentException("Binomial distribution: nTrials must be >= 1 (found " +
                         nTrials.getValue(i) + " at index " + i + ")");
             }
         }

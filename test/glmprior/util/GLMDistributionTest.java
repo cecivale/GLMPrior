@@ -62,8 +62,8 @@ public class GLMDistributionTest {
         glm.linkInput.setValue(LinkFunction.LOG, glm);
         glm.initAndValidate();
         
-        // Linear predictor: η = 2.0 + 1.5*1.0 + (-0.5)*2.0 = 2.5
-        // Mean with log link: μ = exp(2.5) ≈ 12.18
+        // Linear predictor: eta = 2.0 + 1.5*1.0 + (-0.5)*2.0 = 2.5
+        // Mean with log link: mu = exp(2.5) ~= 12.18
         double expectedMean = Math.exp(2.5);
         assertEquals("Normal GLM with log link", expectedMean, glm.getMean(), 1e-10);
     }
@@ -80,7 +80,7 @@ public class GLMDistributionTest {
             assertEquals("Poisson family", DistributionFamily.POISSON, glm.getFamily());
             assertEquals("Poisson canonical link", LinkFunction.LOG, glm.getLink());
             
-            // Mean with log link: μ = exp(2.5) ≈ 12.18
+            // Mean with log link: mu = exp(2.5) ~= 12.18
             double expectedMean = Math.exp(2.5);
             assertEquals("Poisson GLM mean", expectedMean, glm.getMean(), 1e-10);
             
@@ -110,7 +110,7 @@ public class GLMDistributionTest {
             assertEquals("Binomial family", DistributionFamily.BINOMIAL, glm.getFamily());
             assertEquals("Binomial canonical link", LinkFunction.LOGIT, glm.getLink());
             
-            // Linear predictor: η = 2.0 + 0.5*1.0 + (-0.2)*2.0 = 2.1
+            // Linear predictor: eta = 2.0 + 0.5*1.0 + (-0.2)*2.0 = 2.1
             // Probability with logit link: p = exp(2.1)/(1+exp(2.1))
             double eta = 2.1;
             double expectedProb = Math.exp(eta) / (1.0 + Math.exp(eta));
@@ -134,12 +134,12 @@ public class GLMDistributionTest {
         assertEquals("Gamma family", DistributionFamily.GAMMA, glm.getFamily());
         assertEquals("Gamma canonical link", LinkFunction.INVERSE, glm.getLink());
         
-        // Linear predictor: η = 2.5
-        // Mean with inverse link: μ = 1/η = 1/2.5 = 0.4
+        // Linear predictor: eta = 2.5
+        // Mean with inverse link: mu = 1/eta = 1/2.5 = 0.4
         double expectedMean = 1.0 / 2.5;
         assertEquals("Gamma GLM mean", expectedMean, glm.getMean(), 1e-10);
         
-        // For Gamma: variance = μ²/shape = 0.4²/2.0 = 0.08
+        // For Gamma: variance = mu^2/shape = 0.4^2/2.0 = 0.08
         double expectedVar = expectedMean * expectedMean / 2.0;
         assertEquals("Gamma GLM variance", expectedVar, glm.getVariance(), 1e-10);
     }
@@ -243,13 +243,13 @@ public class GLMDistributionTest {
         
         glm.initAndValidate();
         
-        // After standardization, predictors should have mean ≈ 0 and std dev ≈ 1
+        // After standardization, predictors should have mean ~= 0 and std dev ~= 1
         Double[] standardizedVals = nonStandardPreds.getValues();
         double mean = 0.0;
         for (double v : standardizedVals) mean += v;
         mean /= standardizedVals.length;
         
-        assertEquals("Standardized predictors should have mean ≈ 0", 0.0, mean, 1e-10);
+        assertEquals("Standardized predictors should have mean ~= 0", 0.0, mean, 1e-10);
         
         // Check that standard deviation is approximately 1
         double var = 0.0;
@@ -260,7 +260,7 @@ public class GLMDistributionTest {
         var /= (standardizedVals.length - 1);
         double sd = Math.sqrt(var);
         
-        assertEquals("Standardized predictors should have std dev ≈ 1", 1.0, sd, 1e-10);
+        assertEquals("Standardized predictors should have std dev ~= 1", 1.0, sd, 1e-10);
     }
 
     @Test

@@ -2,53 +2,53 @@ package glmprior.util;
 
 /**
  * Enumeration of link functions supported by the GLM framework.
- * Link functions map the linear predictor η to the mean parameter μ of the distribution.
+ * Link functions map the linear predictor eta to the mean parameter mu of the distribution.
  * 
- * The relationship is: η = g(μ), where g is the link function.
- * The inverse link gives: μ = g^(-1)(η).
+ * The relationship is: eta = g(mu), where g is the link function.
+ * The inverse link gives: mu = g^(-1)(eta).
  */
 public enum LinkFunction {
     /**
-     * Identity link: g(μ) = μ
-     * Inverse: μ = η
-     * Domain: μ ∈ ℝ
+     * Identity link: g(mu) = mu
+     * Inverse: mu = eta
+     * Domain: mu in (-inf, inf)
      */
-    IDENTITY("Identity", "g(μ) = μ", "μ ∈ ℝ"),
+    IDENTITY("Identity", "g(mu) = mu", "mu in (-inf, inf)"),
     
     /**
-     * Log link: g(μ) = log(μ)
-     * Inverse: μ = exp(η)
-     * Domain: μ > 0
+     * Log link: g(mu) = log(mu)
+     * Inverse: mu = exp(eta)
+     * Domain: mu > 0
      */
-    LOG("Log", "g(μ) = log(μ)", "μ > 0"),
+    LOG("Log", "g(mu) = log(mu)", "mu > 0"),
     
     /**
-     * Logit link: g(μ) = log(μ/(1-μ))
-     * Inverse: μ = exp(η)/(1+exp(η))
-     * Domain: μ ∈ (0,1)
+     * Logit link: g(mu) = log(mu/(1-mu))
+     * Inverse: mu = exp(eta)/(1+exp(eta))
+     * Domain: mu in (0,1)
      */
-    LOGIT("Logit", "g(μ) = log(μ/(1-μ))", "μ ∈ (0,1)"),
+    LOGIT("Logit", "g(mu) = log(mu/(1-mu))", "mu in (0,1)"),
     
     /**
-     * Probit link: g(μ) = Φ^(-1)(μ)
-     * Inverse: μ = Φ(η)
-     * Domain: μ ∈ (0,1)
+     * Probit link: g(mu) = Phi^(-1)(mu)
+     * Inverse: mu = Phi(eta)
+     * Domain: mu in (0,1)
      */
-    PROBIT("Probit", "g(μ) = Φ⁻¹(μ)", "μ ∈ (0,1)"),
+    PROBIT("Probit", "g(mu) = Phi^(-1)(mu)", "mu in (0,1)"),
     
     /**
-     * Inverse link: g(μ) = 1/μ
-     * Inverse: μ = 1/η
-     * Domain: μ > 0, η ≠ 0
+     * Inverse link: g(mu) = 1/mu
+     * Inverse: mu = 1/eta
+     * Domain: mu > 0, eta != 0
      */
-    INVERSE("Inverse", "g(μ) = 1/μ", "μ > 0"),
+    INVERSE("Inverse", "g(mu) = 1/mu", "mu > 0"),
     
     /**
-     * Square root link: g(μ) = √μ
-     * Inverse: μ = η²
-     * Domain: μ ≥ 0
+     * Square root link: g(mu) = sqrt(mu)
+     * Inverse: mu = eta^2
+     * Domain: mu >= 0
      */
-    SQRT("Square Root", "g(μ) = √μ", "μ ≥ 0"),
+    SQRT("Square Root", "g(mu) = sqrt(mu)", "mu >= 0"),
     
     /**
      * Note: Additional link functions can be added as needed for future distributions.

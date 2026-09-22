@@ -804,7 +804,7 @@ public class GLMTimedParameterInputEditor extends InputEditor.Base {
                 return false; // If any value is numeric, this is NOT a header row
             }
         }
-        return true; // All values are non-numeric → this is a header row
+        return true; // All values are non-numeric -> this is a header row
     }
 
     /**
@@ -816,7 +816,7 @@ public class GLMTimedParameterInputEditor extends InputEditor.Base {
             Double.parseDouble(str.trim()); // Attempt to parse as a number
             return true; // If successful, it's numeric
         } catch (NumberFormatException e) {
-            return false; // Parsing failed → it's not numeric
+            return false; // Parsing failed -> it's not numeric
         }
     }
 
