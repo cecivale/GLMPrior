@@ -52,7 +52,8 @@ public class MultiGLMDistribution extends ParametricDistribution {
             "family", "Distribution family (NORMAL, LOGNORMAL, LOGITNORMAL, POISSON, BINOMIAL, GAMMA)", "NORMAL", Validate.OPTIONAL);
 
     public Input<String> linkInput = new Input<>(
-            "link", "Link function (IDENTITY, LOG, LOGIT, PROBIT, INVERSE, SQRT)", "IDENTITY",
+            "link", "Link function (IDENTITY, LOG, LOGIT, PROBIT, INVERSE, SQRT). " +
+            "If not specified, the canonical link of the family is used.", "",
             Validate.OPTIONAL);
 
     // Predictor transformation options
@@ -245,14 +246,15 @@ public class MultiGLMDistribution extends ParametricDistribution {
 
     /**
      * Parses the link string and returns the LinkFunction enum.
-     * If not specified, returns the canonical link for the family.
+     * If not specified (null or empty), returns the canonical link for the family.
+     * An explicit link name, including IDENTITY, is always honoured.
      */
     private LinkFunction parseLink(String linkStr, DistributionFamily family) {
-        if (linkStr == null || linkStr.isEmpty() || linkStr.equals("IDENTITY")) {
+        if (linkStr == null || linkStr.trim().isEmpty()) {
             return family.getCanonicalLink();
         }
         try {
-            return LinkFunction.valueOf(linkStr.toUpperCase());
+            return LinkFunction.valueOf(linkStr.trim().toUpperCase());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid link function name: " + linkStr +
                     ". Valid options: IDENTITY, LOG, LOGIT, PROBIT, INVERSE, SQRT");

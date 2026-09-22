@@ -10,7 +10,7 @@ public enum DistributionFamily {
      * Domain: real numbers
      * Canonical link: Identity
      * Additional parameters: sigma (standard deviation)
-     */
+ */
     NORMAL("Normal", "mu: (-inf, inf)", "sigma > 0"),
     
     /**
