@@ -134,40 +134,30 @@ public enum DistributionFamily {
     }
     
     /**
+     * Returns true if the mean parameter mu is finite and inside the valid domain for this family.
+     */
+    public boolean isValidMean(double mu) {
+        if (!Double.isFinite(mu)) {
+            return false;
+        }
+        return switch (this) {
+            case NORMAL -> true;                        // mu in (-inf, inf)
+            case POISSON, GAMMA, LOGNORMAL -> mu > 0.0;                    // mu > 0
+            case BINOMIAL -> mu >= 0.0 && mu <= 1.0;      // probability in [0,1]
+            case LOGITNORMAL -> mu > 0.0 && mu < 1.0;        // logit undefined at 0 and 1
+            default -> false;
+        };
+    }
+
+    /**
      * Validates that the mean parameter mu is in the valid domain for this distribution family.
      * @param mu the mean parameter to validate
      * @throws IllegalArgumentException if mu is outside the valid domain
      */
     public void validateMean(double mu) {
-        switch (this) {
-            case NORMAL:
-                // mu in (-inf, inf) - no constraints
-                if (!Double.isFinite(mu)) {
-                    throw new IllegalArgumentException("Normal distribution mean must be finite, got: " + mu);
-                }
-                break;
-            case POISSON:
-            case GAMMA:
-            case LOGNORMAL:
-                // mu > 0
-                if (mu <= 0.0 || !Double.isFinite(mu)) {
-                    throw new IllegalArgumentException(getDisplayName() + " distribution mean must be > 0, got: " + mu);
-                }
-                break;
-            case BINOMIAL:
-                // mu in [0,1] (interpreted as probability p)
-                if (mu < 0.0 || mu > 1.0 || !Double.isFinite(mu)) {
-                    throw new IllegalArgumentException("Binomial distribution probability must be in [0,1], got: " + mu);
-                }
-                break;
-            case LOGITNORMAL:
-                // mu in (0,1) - strict inequality since logit is undefined at 0 and 1
-                if (mu <= 0.0 || mu >= 1.0 || !Double.isFinite(mu)) {
-                    throw new IllegalArgumentException("LogitNormal distribution mean must be in (0,1), got: " + mu);
-                }
-                break;
-            default:
-                throw new IllegalStateException("Domain validation not implemented for " + this);
+        if (!isValidMean(mu)) {
+            throw new IllegalArgumentException(getDisplayName() + " distribution mean must be in " +
+                    getDomain() + ", got: " + mu);
         }
     }
 }

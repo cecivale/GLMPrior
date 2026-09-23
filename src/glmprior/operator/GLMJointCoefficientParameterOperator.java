@@ -254,8 +254,10 @@ public class GLMJointCoefficientParameterOperator extends Operator {
             double deltaMu = newMeans[i] - oldMeans[i];
             double newParamValue = oldParams[i] + deltaMu;
 
-            // Check bounds
-            if (newParamValue < parameter.getLower() || newParamValue > parameter.getUpper()) {
+            // Reject if either GLM state has no valid mean (NaN would otherwise pass the
+            // bounds check below and be written into the parameter), or if out of bounds
+            if (Double.isNaN(newParamValue)
+                    || newParamValue < parameter.getLower() || newParamValue > parameter.getUpper()) {
                 // Revert all parameter changes made so far
                 for (int j = 0; j < i; j++) {
                     parameter.setValue(j, oldParams[j]);

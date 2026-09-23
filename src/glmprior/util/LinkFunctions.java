@@ -118,6 +118,39 @@ public class LinkFunctions {
     }
     
     /**
+     * Returns true if the mean parameter mu is finite and inside the domain of the link function.
+     * Non-throwing counterpart of {@link #validateDomain(LinkFunction, double)}.
+     */
+    public static boolean isInDomain(LinkFunction link, double mu) {
+        if (!Double.isFinite(mu)) {
+            return false;
+        }
+        return switch (link) {
+            case IDENTITY -> true;
+            case LOG, INVERSE -> mu > 0.0;
+            case LOGIT, PROBIT -> mu > 0.0 && mu < 1.0;
+            case SQRT -> mu >= 0.0;
+            default -> false;
+        };
+    }
+
+    /**
+     * Returns true if the linear predictor eta is finite and the inverse link can be applied to it
+     * without leaving the domain of the mean. Non-throwing counterpart of the checks in
+     * {@link #inverse(LinkFunction, double)}.
+     */
+    public static boolean isValidLinearPredictor(LinkFunction link, double eta) {
+        if (!Double.isFinite(eta)) {
+            return false;
+        }
+        return switch (link) {
+            case INVERSE -> eta >= LOG_EPSILON; // 1/eta must be positive and finite
+            case SQRT -> eta >= 0.0;
+            default -> true;
+        };
+    }
+
+    /**
      * Validate that the mean parameter mu is in the valid domain for the given link function.
      * 
      * @param link the link function

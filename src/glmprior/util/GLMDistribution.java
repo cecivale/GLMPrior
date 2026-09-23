@@ -5,7 +5,9 @@ import beast.base.inference.distribution.ParametricDistribution;
 import beast.base.inference.parameter.RealParameter;
 import beast.base.inference.parameter.BooleanParameter;
 
+import org.apache.commons.math.distribution.ContinuousDistribution;
 import org.apache.commons.math.distribution.Distribution;
+import org.apache.commons.math.distribution.IntegerDistribution;
 import org.apache.commons.math.distribution.NormalDistributionImpl;
 import org.apache.commons.math.distribution.PoissonDistributionImpl;
 import org.apache.commons.math.distribution.GammaDistributionImpl;
@@ -107,33 +109,25 @@ public class GLMDistribution extends ParametricDistribution {
      * so the link function is applied to convert it to the linear predictor scale.
      */
     private double computeLinearPredictor() {
-        // Apply link function to baseline value to get intercept on linear predictor scale
-        double eta = LinkFunctions.apply(link, baselineValue.getValue());
-        final Double[] beta = coefficients.getValues();
-
-        if (indicators !=null)
-            return computeLinearPredictor(eta, beta, indicators.getValues());
-
-        return computeLinearPredictor(eta, beta, null);
-
-//        for (int j = 0; j < p; j++) {
-//            double coefficient = beta[j];
-//
-//            // Apply indicator variable if provided (for variable selection)
-//            if (indicators != null) {
-//                boolean indicator = indicators.getValue(j);
-//                if (!indicator) {
-//                    coefficient = 0.0; // Exclude this variable if indicator is false
-//                }
-//            }
-//
-//            eta += coefficient * predictorValues[j];
-//        }
-//
-//        return eta;
+        return computeLinearPredictor(baselineValue.getValue(), coefficients.getValues(),
+                indicators != null ? indicators.getValues() : null);
     }
 
-    private double computeLinearPredictor(double eta, Double[] beta, Boolean[] indicators) {
+    /**
+     * Computes the linear predictor from explicit values.
+     * Returns NaN if the baseline value lies outside the domain of the link function
+     * (e.g. a non-positive baseline with a log link), so that callers can reject the
+     * state instead of throwing.
+     */
+    private double computeLinearPredictor(double baseline, Double[] beta, Boolean[] indicators) {
+        if (!LinkFunctions.isInDomain(link, baseline)) {
+            return Double.NaN;
+        }
+        double eta = LinkFunctions.apply(link, baseline);
+        return accumulateLinearPredictor(eta, beta, indicators);
+    }
+
+    private double accumulateLinearPredictor(double eta, Double[] beta, Boolean[] indicators) {
         for (int j = 0; j < p; j++) {
             double coefficient = beta[j];
 
@@ -152,28 +146,25 @@ public class GLMDistribution extends ParametricDistribution {
     }
 
     /**
-     * Computes the mean parameter mu = g^(-1)(eta) using the inverse link function
+     * Computes the mean parameter mu = g^(-1)(eta) using the inverse link function.
+     * Returns NaN if the current state gives no valid mean: the baseline is outside the
+     * link domain, the linear predictor cannot be inverted (e.g. negative eta with an
+     * inverse link), or the resulting mean is outside the family's domain.
      */
     private double computeMean() {
-        double eta = computeLinearPredictor();
-        double mu = LinkFunctions.inverse(link, eta);
-
-        // Validate that mu is in the valid domain for this distribution family
-        family.validateMean(mu);
-
-        return mu;
+        return meanFromLinearPredictor(computeLinearPredictor());
     }
 
     private double computeMean(Double baselineValue, Double[] coefficients, Boolean[] indicators) {
-        // Apply link function to baseline value to get intercept on linear predictor scale
-        double interceptOnEtaScale = LinkFunctions.apply(link, baselineValue);
-        double eta = computeLinearPredictor(interceptOnEtaScale, coefficients, indicators);
+        return meanFromLinearPredictor(computeLinearPredictor(baselineValue, coefficients, indicators));
+    }
+
+    private double meanFromLinearPredictor(double eta) {
+        if (!LinkFunctions.isValidLinearPredictor(link, eta)) {
+            return Double.NaN;
+        }
         double mu = LinkFunctions.inverse(link, eta);
-
-        // Validate that mu is in the valid domain for this distribution family
-        family.validateMean(mu);
-
-        return mu;
+        return family.isValidMean(mu) ? mu : Double.NaN;
     }
 
     /**
@@ -181,11 +172,21 @@ public class GLMDistribution extends ParametricDistribution {
      * Returns the proper Distribution type (continuous or discrete).
      *
      * Note: LogNormal is not supported via this method - use logDensity() directly.
+     *
+     * @throws IllegalStateException if the current state gives no valid mean; use
+     *         logDensity() for evaluations that must not throw during MCMC.
      */
     @Override
     public Distribution getDistribution() {
         double mu = computeMean();
+        if (Double.isNaN(mu)) {
+            throw new IllegalStateException(family.getDisplayName() + " GLM with " + link.getDisplayName() +
+                    " link has no valid mean for the current parameter values");
+        }
+        return getDistribution(mu);
+    }
 
+    private Distribution getDistribution(double mu) {
         switch (family) {
             case NORMAL:
                 double sigmaValue = getSigmaValue();
@@ -225,7 +226,13 @@ public class GLMDistribution extends ParametricDistribution {
 
     /**
      * Computes the log density for the given value.
-     * Overridden to provide proper LogNormal and LogitNormal support.
+     *
+     * Never throws for an invalid GLM state: if the current parameter values give no valid
+     * mean (baseline outside the link domain, non-invertible linear predictor, or mean outside
+     * the family domain), the result is -Infinity so the MCMC rejects the proposal.
+     *
+     * Note: the offset input of ParametricDistribution is ignored, consistent with
+     * MultiGLMDistribution.calcLogP.
      */
     @Override
     public double logDensity(double x) {
@@ -235,8 +242,21 @@ public class GLMDistribution extends ParametricDistribution {
         if (family == DistributionFamily.LOGITNORMAL) {
             return logitNormalLogDensity(x);
         }
-        // For other families, use the parent implementation
-        return super.logDensity(x);
+
+        double mu = computeMean();
+        if (Double.isNaN(mu)) {
+            return Double.NEGATIVE_INFINITY;
+        }
+
+        Distribution dist = getDistribution(mu);
+        if (dist instanceof ContinuousDistribution) {
+            return ((ContinuousDistribution) dist).logDensity(x);
+        }
+        if (dist instanceof IntegerDistribution) {
+            double probability = ((IntegerDistribution) dist).probability(x);
+            return probability > 0 ? Math.log(probability) : Double.NEGATIVE_INFINITY;
+        }
+        return Double.NEGATIVE_INFINITY;
     }
 
     /**
@@ -255,6 +275,9 @@ public class GLMDistribution extends ParametricDistribution {
         }
 
         double eta = computeLinearPredictor(); // log-scale mean
+        if (!Double.isFinite(eta)) {
+            return Double.NEGATIVE_INFINITY; // baseline outside link domain
+        }
         double sigmaValue = getSigmaValue();
         double logY = Math.log(y);
         double z = (logY - eta) / sigmaValue;
@@ -282,6 +305,9 @@ public class GLMDistribution extends ParametricDistribution {
         }
 
         double eta = computeLinearPredictor(); // logit-scale mean
+        if (!Double.isFinite(eta)) {
+            return Double.NEGATIVE_INFINITY; // baseline outside link domain
+        }
         double sigmaValue = getSigmaValue();
         double logitY = Math.log(y / (1.0 - y)); // logit(y)
         double z = (logitY - eta) / sigmaValue;
@@ -293,18 +319,11 @@ public class GLMDistribution extends ParametricDistribution {
     }
 
     /**
-     * Computes the density for the given value.
-     * Overridden to provide proper LogNormal and LogitNormal support.
+     * Computes the density for the given value. Returns 0 for an invalid GLM state.
      */
     @Override
     public double density(double x) {
-        if (family == DistributionFamily.LOGNORMAL) {
-            return Math.exp(logNormalLogDensity(x));
-        }
-        if (family == DistributionFamily.LOGITNORMAL) {
-            return Math.exp(logitNormalLogDensity(x));
-        }
-        return super.density(x);
+        return Math.exp(logDensity(x));
     }
 
     /**
@@ -335,12 +354,23 @@ public class GLMDistribution extends ParametricDistribution {
     }
 
     // Convenience accessors
+
+    /**
+     * Mean (location) for the current parameter values, or NaN if the current state gives
+     * no valid mean. Callers such as operators must treat NaN as a reason to reject.
+     */
     public double getMean() {
         return computeMean();
     }
 
+    /**
+     * Mean (location) computed from the stored (pre-proposal) parameter values, or NaN if
+     * that state gives no valid mean.
+     */
     public double getStoredMean() {
-        return computeMean(baselineValue.getStoredValues()[0], coefficients.getStoredValues(), indicators.getStoredValues());
+        return computeMean(baselineValue.getStoredValues()[0],
+                coefficients.getStoredValues(),
+                indicators != null ? indicators.getStoredValues() : null);
     }
 
     public double getVariance() {
