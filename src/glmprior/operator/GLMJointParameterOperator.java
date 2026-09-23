@@ -4,12 +4,10 @@ import beast.base.core.Description;
 import beast.base.core.Input;
 import beast.base.core.Input.Validate;
 import beast.base.inference.Operator;
-import beast.base.inference.parameter.IntegerParameter;
 import beast.base.inference.parameter.RealParameter;
-import beast.base.util.Randomizer;
 import glmprior.util.MultiGLMDistribution;
 
-import java.text.DecimalFormat;
+
 
 /**
  * A joint operator that updates both GLM coefficients and the dependent parameter

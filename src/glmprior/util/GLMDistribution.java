@@ -29,23 +29,23 @@ import org.apache.commons.math.distribution.BinomialDistributionImpl;
 public class GLMDistribution extends ParametricDistribution {
 
     // Core GLM fields
-    private RealParameter baselineValue;
-    private RealParameter coefficients;
-    private Double[] predictorValues;
-    private BooleanParameter indicators;
+    private final RealParameter baselineValue;
+    private final RealParameter coefficients;
+    private final Double[] predictorValues;
+    private final BooleanParameter indicators;
 
     // Distribution family and link function
-    private DistributionFamily family;
-    private LinkFunction link;
+    private final DistributionFamily family;
+    private final LinkFunction link;
 
     // Distribution-specific parameters
-    private RealParameter sigma;
-    private RealParameter sigma2;
-    private RealParameter nTrials;
-    private RealParameter shape;
+    private final RealParameter sigma;
+    private final RealParameter sigma2;
+    private final RealParameter nTrials;
+    private final RealParameter shape;
 
     // Cached values
-    private int p; // number of predictors
+    private final int p; // number of predictors
 
     /**
      * Programmatic constructor for creating GLMDistribution instances.
@@ -235,12 +235,12 @@ public class GLMDistribution extends ParametricDistribution {
      * MultiGLMDistribution.calcLogP.
      */
     @Override
-    public double logDensity(double x) {
+    public double logDensity(double y) {
         if (family == DistributionFamily.LOGNORMAL) {
-            return logNormalLogDensity(x);
+            return logNormalLogDensity(y);
         }
         if (family == DistributionFamily.LOGITNORMAL) {
-            return logitNormalLogDensity(x);
+            return logitNormalLogDensity(y);
         }
 
         double mu = computeMean();
@@ -250,10 +250,10 @@ public class GLMDistribution extends ParametricDistribution {
 
         Distribution dist = getDistribution(mu);
         if (dist instanceof ContinuousDistribution) {
-            return ((ContinuousDistribution) dist).logDensity(x);
+            return ((ContinuousDistribution) dist).logDensity(y);
         }
         if (dist instanceof IntegerDistribution) {
-            double probability = ((IntegerDistribution) dist).probability(x);
+            double probability = ((IntegerDistribution) dist).probability(y);
             return probability > 0 ? Math.log(probability) : Double.NEGATIVE_INFINITY;
         }
         return Double.NEGATIVE_INFINITY;
@@ -337,20 +337,6 @@ public class GLMDistribution extends ParametricDistribution {
         } else {
             throw new IllegalStateException("No sigma or sigma2 parameter available for Normal distribution");
         }
-    }
-
-    /**
-     * Returns a string listing the valid link functions for the current distribution family.
-     */
-    private String getValidLinksString() {
-        StringBuilder sb = new StringBuilder();
-        for (LinkFunction lf : LinkFunction.values()) {
-            if (family.isValidLink(lf)) {
-                if (sb.length() > 0) sb.append(", ");
-                sb.append(lf.getDisplayName());
-            }
-        }
-        return sb.toString();
     }
 
     // Convenience accessors

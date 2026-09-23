@@ -1,7 +1,6 @@
 package glmprior.util;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
-import org.apache.commons.math3.special.Erf;
 
 /**
  * Utility class for applying link functions and their inverses in GLM computations.
@@ -29,34 +28,24 @@ public class LinkFunctions {
      */
     public static double apply(LinkFunction link, double mu) {
         validateDomain(link, mu);
-        
-        switch (link) {
-            case IDENTITY:
-                return mu;
-                
-            case LOG:
-                return Math.log(Math.max(mu, LOG_EPSILON));
-                
-            case LOGIT:
+
+        return switch (link) {
+            case IDENTITY -> mu;
+            case LOG -> Math.log(Math.max(mu, LOG_EPSILON));
+            case LOGIT -> {
                 // Clamp to avoid numerical issues
                 double p = Math.max(LOGIT_EPSILON, Math.min(1.0 - LOGIT_EPSILON, mu));
-                return Math.log(p / (1.0 - p));
-                
-            case PROBIT:
+                yield Math.log(p / (1.0 - p));
+            }
+            case PROBIT -> {
                 // Clamp to avoid numerical issues
                 double pProbit = Math.max(LOGIT_EPSILON, Math.min(1.0 - LOGIT_EPSILON, mu));
-                return STANDARD_NORMAL.inverseCumulativeProbability(pProbit);
-                
-            case INVERSE:
-                return 1.0 / mu;
-                
-            case SQRT:
-                return Math.sqrt(mu);
-                
-                
-            default:
-                throw new IllegalArgumentException("Unsupported link function: " + link);
-        }
+                yield STANDARD_NORMAL.inverseCumulativeProbability(pProbit);
+            }
+            case INVERSE -> 1.0 / mu;
+            case SQRT -> Math.sqrt(mu);
+            default -> throw new IllegalArgumentException("Unsupported link function: " + link);
+        };
     }
     
     /**
@@ -218,8 +207,7 @@ public class LinkFunctions {
                 return expEta / (denom * denom);
                 
             case PROBIT:
-                double phi = Math.exp(-0.5 * eta * eta) / Math.sqrt(2.0 * Math.PI);
-                return phi;
+                return Math.exp(-0.5 * eta * eta) / Math.sqrt(2.0 * Math.PI);
                 
             case INVERSE:
                 return -1.0 / (eta * eta);

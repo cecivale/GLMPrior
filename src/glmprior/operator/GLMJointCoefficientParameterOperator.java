@@ -173,7 +173,7 @@ public class GLMJointCoefficientParameterOperator extends Operator {
         double[] newMeans = glmDistribution.getAllMeans();
 
         // Adjust parameter values deterministically to track mean changes
-        if (!updateParameterDeterministically(parameter, oldMeans, newMeans)) {
+        if (updateParameterDeterministically(parameter, oldMeans, newMeans)) {
             // Revert coefficient if parameter update failed
             coefficients.setValue(coeffIndex, oldCoeff);
             return false;
@@ -221,7 +221,7 @@ public class GLMJointCoefficientParameterOperator extends Operator {
         double[] newMeans = glmDistribution.getAllMeans();
 
         // Adjust parameter values deterministically
-        if (!updateParameterDeterministically(parameter, oldMeans, newMeans)) {
+        if (updateParameterDeterministically(parameter, oldMeans, newMeans)) {
             // Revert all coefficients
             for (int i = 0; i < coefficients.getDimension(); i++) {
                 coefficients.setValue(i, oldCoeffs[i]);
@@ -262,13 +262,13 @@ public class GLMJointCoefficientParameterOperator extends Operator {
                 for (int j = 0; j < i; j++) {
                     parameter.setValue(j, oldParams[j]);
                 }
-                return false;
+                return true;
             }
 
             parameter.setValue(i, newParamValue);
         }
 
-        return true;
+        return false;
     }
 
     @Override

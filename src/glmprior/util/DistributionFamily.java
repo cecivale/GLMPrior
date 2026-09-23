@@ -89,48 +89,36 @@ public enum DistributionFamily {
      * Returns the canonical link function for this distribution family.
      */
     public LinkFunction getCanonicalLink() {
-        switch (this) {
-            case NORMAL:
-                return LinkFunction.IDENTITY;
-            case POISSON:
-                return LinkFunction.LOG;
-            case BINOMIAL:
-                return LinkFunction.LOGIT;
-            case GAMMA:
-                return LinkFunction.INVERSE;
-            case LOGNORMAL:
-                return LinkFunction.LOG;
-            case LOGITNORMAL:
-                return LinkFunction.LOGIT;
-            default:
-                throw new IllegalStateException("No canonical link defined for " + this);
-        }
+        return switch (this) {
+            case NORMAL -> LinkFunction.IDENTITY;
+            case POISSON -> LinkFunction.LOG;
+            case BINOMIAL -> LinkFunction.LOGIT;
+            case GAMMA -> LinkFunction.INVERSE;
+            case LOGNORMAL -> LinkFunction.LOG;
+            case LOGITNORMAL -> LinkFunction.LOGIT;
+            default -> throw new IllegalStateException("No canonical link defined for " + this);
+        };
     }
     
     /**
      * Returns true if the given link function is valid for this distribution family.
      */
     public boolean isValidLink(LinkFunction link) {
-        switch (this) {
-            case NORMAL:
-                return link == LinkFunction.IDENTITY || link == LinkFunction.LOG;
-            case POISSON:
-                return link == LinkFunction.LOG || link == LinkFunction.IDENTITY || link == LinkFunction.SQRT;
-            case BINOMIAL:
-                return link == LinkFunction.LOGIT || link == LinkFunction.PROBIT || link == LinkFunction.IDENTITY;
-            case GAMMA:
-                return link == LinkFunction.INVERSE || link == LinkFunction.LOG || link == LinkFunction.IDENTITY;
-            case LOGNORMAL:
+        return switch (this) {
+            case NORMAL -> link == LinkFunction.IDENTITY || link == LinkFunction.LOG;
+            case POISSON -> link == LinkFunction.LOG || link == LinkFunction.IDENTITY || link == LinkFunction.SQRT;
+            case BINOMIAL -> link == LinkFunction.LOGIT || link == LinkFunction.PROBIT || link == LinkFunction.IDENTITY;
+            case GAMMA -> link == LinkFunction.INVERSE || link == LinkFunction.LOG || link == LinkFunction.IDENTITY;
+            case LOGNORMAL ->
                 // LogNormal naturally uses log link (models log(Y) ~ Normal)
                 // Identity link would mean Y ~ LogNormal(mu, sigma) directly
-                return link == LinkFunction.LOG || link == LinkFunction.IDENTITY;
-            case LOGITNORMAL:
+                    link == LinkFunction.LOG || link == LinkFunction.IDENTITY;
+            case LOGITNORMAL ->
                 // LogitNormal naturally uses logit link (models logit(Y) ~ Normal)
                 // Identity link would mean Y ~ LogitNormal(mu, sigma) directly
-                return link == LinkFunction.LOGIT || link == LinkFunction.IDENTITY;
-            default:
-                return false;
-        }
+                    link == LinkFunction.LOGIT || link == LinkFunction.IDENTITY;
+            default -> false;
+        };
     }
     
     /**
