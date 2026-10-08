@@ -6,7 +6,7 @@ import beast.base.inference.Distribution;
 import beast.base.inference.distribution.Prior;
 import beast.base.inference.parameter.RealParameter;
 import beastfx.app.inputeditor.*;
-import feast.function.Slice;
+import bdmmprime.util.Slice;
 import glmprior.util.GLMNormalDistribution;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
@@ -30,6 +30,7 @@ import java.util.Set;
 /** Editor for Prior.distr when value is GLMNormalDistribution. Renders GLM inputs + the time-series builder button. */
 public class GLMNormalPriorDecoratorEditor extends ParametricDistributionInputEditor {
 
+    public GLMNormalPriorDecoratorEditor() { super(); }
     public GLMNormalPriorDecoratorEditor(BeautiDoc doc) { super(doc); }
 
     // Some BEAST builds look for both:
@@ -125,7 +126,7 @@ public class GLMNormalPriorDecoratorEditor extends ParametricDistributionInputEd
                 Slice s0 = new Slice();
                 s0.setID("slice_" + x.getID() + "_0");
 
-                s0.functionInput.setValue(x, s0);
+                s0.realVectorInput.setValue(x, s0);
                 s0.startIndexInput.setValue(0, s0);
                 s0.countInput.setValue(1, s0);
                 doc.registerPlugin(s0);
@@ -155,7 +156,7 @@ public class GLMNormalPriorDecoratorEditor extends ParametricDistributionInputEd
                     // Slice y[t]
                     Slice st = new Slice();
                     st.setID("slice_" + x.getID() + "_" + t);
-                    st.functionInput.setValue(x, st);
+                    st.realVectorInput.setValue(x, st);
                     st.startIndexInput.setValue(t, st);
                     st.countInput.setValue(1, st);
                     doc.registerPlugin(st);

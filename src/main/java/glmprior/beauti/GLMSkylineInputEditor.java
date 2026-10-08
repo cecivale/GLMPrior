@@ -50,6 +50,9 @@ public abstract class GLMSkylineInputEditor extends InputEditor.Base {
 
     Boolean isGLM = false;
 
+    public GLMSkylineInputEditor() {
+        super();
+    }
     public GLMSkylineInputEditor(BeautiDoc doc) {
         super(doc);
     }
@@ -239,7 +242,7 @@ public abstract class GLMSkylineInputEditor extends InputEditor.Base {
         int nTypes = skylineParameter.getNTypes();
 
         if ((skylineParameter.skylineValuesInput.get() instanceof RealParameter &&
-                (skylineParameter.skylineValuesInput.get()).getDimension() == (nChanges + 1)) ||
+                (skylineParameter.skylineValuesInput.get()).size() == (nChanges + 1)) ||
                 (skylineParameter.skylineValuesInput.get() instanceof GLMPrior &&
                         ((GLMPrior) skylineParameter.skylineValuesInput.get()).predictorsInput.get().get(0).getDimension() == (nChanges + 1))) {
             if (nTypes > 1) {

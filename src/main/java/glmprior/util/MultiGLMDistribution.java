@@ -8,9 +8,6 @@ import beast.base.inference.distribution.ParametricDistribution;
 import beast.base.inference.parameter.RealParameter;
 import beast.base.inference.parameter.BooleanParameter;
 
-import org.apache.commons.math.MathException;
-import org.apache.commons.math.distribution.Distribution;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -509,7 +506,7 @@ public class MultiGLMDistribution extends ParametricDistribution {
      * Note: This is for compatibility with ParametricDistribution interface.
      */
     @Override
-    public Distribution getDistribution() {
+    public Object getDistribution() {
         if (glmDistributions.isEmpty()) {
             throw new IllegalStateException("No GLM distributions available");
         }
@@ -608,7 +605,7 @@ public class MultiGLMDistribution extends ParametricDistribution {
      * corresponds to one dimension.
      */
     @Override
-    public Double[][] sample(int size) throws MathException {
+    public Double[][] sample(int size) {
         Double[][] samples = new Double[size][numDimensions];
 
         for (int j = 0; j < numDimensions; j++) {
@@ -641,7 +638,7 @@ public class MultiGLMDistribution extends ParametricDistribution {
      * Calculates cumulative probability using the first distribution.
      */
     @Override
-    public double cumulativeProbability(double x) throws MathException {
+    public double cumulativeProbability(double x) {
         return glmDistributions.get(0).cumulativeProbability(x);
     }
 
@@ -649,7 +646,7 @@ public class MultiGLMDistribution extends ParametricDistribution {
      * Calculates cumulative probability between bounds using the first distribution.
      */
     @Override
-    public double cumulativeProbability(double x0, double x1) throws MathException {
+    public double cumulativeProbability(double x0, double x1) {
         return glmDistributions.get(0).cumulativeProbability(x0, x1);
     }
 
@@ -657,7 +654,7 @@ public class MultiGLMDistribution extends ParametricDistribution {
      * Calculates inverse cumulative probability using the first distribution.
      */
     @Override
-    public double inverseCumulativeProbability(double p) throws MathException {
+    public double inverseCumulativeProbability(double p){
         return glmDistributions.get(0).inverseCumulativeProbability(p);
     }
 }

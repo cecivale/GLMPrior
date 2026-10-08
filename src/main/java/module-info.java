@@ -1,6 +1,7 @@
 open module glmprior {
     requires beast.pkgmgmt;
     requires beast.base;
+    requires java.xml;
     requires beast.fx;
     requires bdmmprime;
     requires org.apache.commons.statistics.distribution;
@@ -19,7 +20,6 @@ open module glmprior {
         glmprior.util.GLMDistribution,
         glmprior.util.MultiGLMDistribution,
         glmprior.util.GLMLogger,
-        glmprior.util.LinkFunction,
         glmprior.util.FunctionParameter,
         glmprior.util.SingleIndexBooleanParameter,
         glmprior.operator.ExtendedSwapOperator,

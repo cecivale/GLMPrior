@@ -136,16 +136,4 @@ public enum DistributionFamily {
             default -> false;
         };
     }
-
-    /**
-     * Validates that the mean parameter mu is in the valid domain for this distribution family.
-     * @param mu the mean parameter to validate
-     * @throws IllegalArgumentException if mu is outside the valid domain
-     */
-    public void validateMean(double mu) {
-        if (!isValidMean(mu)) {
-            throw new IllegalArgumentException(getDisplayName() + " distribution mean must be in " +
-                    getDomain() + ", got: " + mu);
-        }
-    }
 }

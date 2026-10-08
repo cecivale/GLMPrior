@@ -30,7 +30,6 @@ public class FunctionParameter extends RealParameter {
 
     @Override
     public void initAndValidate() {
-        super.initAndValidate();
         function = functionInput.get();
         if (function == null) {
             throw new IllegalArgumentException("Function input is required");
@@ -40,9 +39,15 @@ public class FunctionParameter extends RealParameter {
         if (function instanceof beast.base.core.BEASTObject beastFunction) {
             beastFunction.initAndValidate();
         }
-        
-        initialized = true;
 
+        // Parameter.Base.initAndValidate() divides by the number of supplied values,
+        // so give it a placeholder. Real values always come from the function.
+        if (valuesInput.get().isEmpty()) {
+            valuesInput.get().add(0.0);
+        }
+        super.initAndValidate();
+
+        initialized = true;
     }
 
     @Override

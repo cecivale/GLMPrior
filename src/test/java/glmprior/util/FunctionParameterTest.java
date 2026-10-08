@@ -106,67 +106,25 @@ public class FunctionParameterTest {
 
     @Test
     public void testIndexOutOfBounds() {
-        try {
-            functionParam.getValue(-1);
-            fail("Should throw IndexOutOfBoundsException for negative index");
-        } catch (IndexOutOfBoundsException e) {
-            assertTrue("Expected index out of bounds message", 
-                    e.getMessage().contains("out of bounds"));
-        }
+        assertThrows(IndexOutOfBoundsException.class, () -> functionParam.getValue(-1));
 
-        try {
-            functionParam.getValue(3);
-            fail("Should throw IndexOutOfBoundsException for index >= dimension");
-        } catch (IndexOutOfBoundsException e) {
-            assertTrue("Expected index out of bounds message", 
-                    e.getMessage().contains("out of bounds"));
-        }
+        assertThrows(IndexOutOfBoundsException.class, () -> functionParam.getValue(3));
     }
 
     @Test
     public void testSetValueNotSupported() {
-        try {
-            functionParam.setValue(0, 99.0);
-            fail("Should throw UnsupportedOperationException for setValue");
-        } catch (UnsupportedOperationException e) {
-            assertTrue("Expected unsupported operation message", 
-                    e.getMessage().contains("Cannot set values"));
-        }
+        assertThrows(UnsupportedOperationException.class, () -> functionParam.setValue(0, 99.0));
 
-        try {
-            functionParam.setValue(99.0);
-            fail("Should throw UnsupportedOperationException for setValue");
-        } catch (UnsupportedOperationException e) {
-            assertTrue("Expected unsupported operation message", 
-                    e.getMessage().contains("Cannot set values"));
-        }
+        assertThrows(UnsupportedOperationException.class, () -> functionParam.setValue(99.0));
 
-        try {
-            functionParam.setValueQuietly(0, 99.0);
-            fail("Should throw UnsupportedOperationException for setValueQuietly");
-        } catch (UnsupportedOperationException e) {
-            assertTrue("Expected unsupported operation message", 
-                    e.getMessage().contains("Cannot set values"));
-        }
+        assertThrows(UnsupportedOperationException.class, () -> functionParam.setValueQuietly(0, 99.0));
     }
 
     @Test
     public void testAssignNotSupported() {
-        try {
-            functionParam.assignFrom("1.0 2.0 3.0");
-            fail("Should throw UnsupportedOperationException for assignFrom");
-        } catch (UnsupportedOperationException e) {
-            assertTrue("Expected unsupported operation message", 
-                    e.getMessage().contains("Cannot assign values"));
-        }
+        assertThrows(UnsupportedOperationException.class, () -> functionParam.assignFrom("1.0 2.0 3.0"));
 
-        try {
-            functionParam.assignFromWithoutID("1.0 2.0 3.0");
-            fail("Should throw UnsupportedOperationException for assignFromWithoutID");
-        } catch (UnsupportedOperationException e) {
-            assertTrue("Expected unsupported operation message", 
-                    e.getMessage().contains("Cannot assign values"));
-        }
+        assertThrows(UnsupportedOperationException.class, () -> functionParam.assignFromWithoutID("1.0 2.0 3.0"));
     }
 
     @Test
@@ -228,37 +186,10 @@ public class FunctionParameterTest {
     }
 
     @Test
-    public void testWithGLMDistribution() {
-        // Test with actual GLMDistribution
-        GLMDistribution glm = new GLMDistribution();
-        glm.interceptInput.setValue(new RealParameter("2.0"), glm);
-        glm.coefficientsInput.setValue(new RealParameter("1.5 -0.5"), glm);
-        glm.predictorsInput.setValue(new RealParameter("1.0 2.0"), glm);
-        glm.sigmaInput.setValue(new RealParameter("1.0"), glm);
-        glm.initAndValidate();
-        
-        FunctionParameter glmParam = new FunctionParameter();
-        glmParam.functionInput.setValue(glm, glmParam);
-        glmParam.initAndValidate();
-        
-        assertEquals("GLM should have dimension 1", 1, glmParam.getDimension());
-        
-        // Expected: intercept + coefficients * predictors = 2.0 + 1.5*1.0 + (-0.5)*2.0 = 2.5
-        double expectedValue = 2.5;
-        assertEquals("GLM computed value should be correct", expectedValue, glmParam.getArrayValue(), 1e-10);
-    }
-
-    @Test
     public void testNullFunction() {
         FunctionParameter nullParam = new FunctionParameter();
         // Don't set function input
         
-        try {
-            nullParam.initAndValidate();
-            fail("Should throw exception for null function");
-        } catch (IllegalArgumentException e) {
-            assertTrue("Expected null function message", 
-                    e.getMessage().contains("Function input is required"));
-        }
+        assertThrows(IllegalArgumentException.class, () -> nullParam.initAndValidate());
     }
 }

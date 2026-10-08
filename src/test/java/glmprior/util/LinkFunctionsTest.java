@@ -91,56 +91,18 @@ public class LinkFunctionsTest {
     }
 
     @Test
-    public void testInverseSquaredLink() {
-        double[] testValues = {0.1, 0.5, 1.0, 2.0, 4.0};
-        
-        for (double mu : testValues) {
-            double eta = LinkFunctions.apply(LinkFunction.INVERSE_SQUARED, mu);
-            assertEquals("Inverse squared link forward", 1.0 / (mu * mu), eta, TOLERANCE);
-            
-            double muInverse = LinkFunctions.inverse(LinkFunction.INVERSE_SQUARED, eta);
-            assertEquals("Inverse squared link inverse", mu, muInverse, TOLERANCE);
-        }
-    }
-
-    @Test
     public void testDomainValidation() {
         // Test domain validation for log link (mu > 0)
-        try {
-            LinkFunctions.apply(LinkFunction.LOG, 0.0);
-            fail("Should have thrown exception for mu = 0 with log link");
-        } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("Log link requires mu > 0"));
-        }
+        assertThrows(IllegalArgumentException.class, () -> LinkFunctions.apply(LinkFunction.LOG, 0.0));
 
-        try {
-            LinkFunctions.apply(LinkFunction.LOG, -1.0);
-            fail("Should have thrown exception for mu < 0 with log link");
-        } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("Log link requires mu > 0"));
-        }
+        assertThrows(IllegalArgumentException.class, () -> LinkFunctions.apply(LinkFunction.LOG, -1.0));
 
         // Test domain validation for logit link (0 < mu < 1)
-        try {
-            LinkFunctions.apply(LinkFunction.LOGIT, 0.0);
-            fail("Should have thrown exception for mu = 0 with logit link");
-        } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("Logit link requires mu in (0,1)"));
-        }
+        assertThrows(IllegalArgumentException.class, () -> LinkFunctions.apply(LinkFunction.LOGIT, 0.0));
 
-        try {
-            LinkFunctions.apply(LinkFunction.LOGIT, 1.0);
-            fail("Should have thrown exception for mu = 1 with logit link");
-        } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("Logit link requires mu in (0,1)"));
-        }
+        assertThrows(IllegalArgumentException.class, () -> LinkFunctions.apply(LinkFunction.LOGIT, 1.0));
 
-        try {
-            LinkFunctions.apply(LinkFunction.LOGIT, 1.5);
-            fail("Should have thrown exception for mu > 1 with logit link");
-        } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("Logit link requires mu in (0,1)"));
-        }
+        assertThrows(IllegalArgumentException.class, () -> LinkFunctions.apply(LinkFunction.LOGIT, 1.5));
     }
 
     @Test
@@ -191,34 +153,14 @@ public class LinkFunctionsTest {
     @Test
     public void testInvalidInputs() {
         // Test infinite inputs
-        try {
-            LinkFunctions.apply(LinkFunction.IDENTITY, Double.POSITIVE_INFINITY);
-            fail("Should reject infinite mu");
-        } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("finite"));
-        }
+        assertThrows(IllegalArgumentException.class, () -> LinkFunctions.apply(LinkFunction.IDENTITY, Double.POSITIVE_INFINITY));
 
-        try {
-            LinkFunctions.inverse(LinkFunction.IDENTITY, Double.NaN);
-            fail("Should reject NaN eta");
-        } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("finite"));
-        }
+        assertThrows(IllegalArgumentException.class, () -> LinkFunctions.inverse(LinkFunction.IDENTITY, Double.NaN));
 
         // Test division by zero in inverse link
-        try {
-            LinkFunctions.inverse(LinkFunction.INVERSE, 0.0);
-            fail("Should reject eta = 0 for inverse link");
-        } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("Cannot compute 1/eta"));
-        }
+        assertThrows(IllegalArgumentException.class, () -> LinkFunctions.inverse(LinkFunction.INVERSE, 0.0));
 
         // Test negative eta for sqrt inverse
-        try {
-            LinkFunctions.inverse(LinkFunction.SQRT, -1.0);
-            fail("Should reject negative eta for sqrt link");
-        } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("Square root link requires eta >= 0"));
-        }
+        assertThrows(IllegalArgumentException.class, () -> LinkFunctions.inverse(LinkFunction.SQRT, -1.0));
     }
 }

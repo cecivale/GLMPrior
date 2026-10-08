@@ -1,6 +1,6 @@
 package glmprior.util;
 
-import org.apache.commons.math3.distribution.NormalDistribution;
+import org.apache.commons.statistics.distribution.NormalDistribution;
 
 /**
  * Utility class for applying link functions and their inverses in GLM computations.
@@ -11,7 +11,7 @@ import org.apache.commons.math3.distribution.NormalDistribution;
 public class LinkFunctions {
     
     // Standard normal distribution for probit calculations
-    private static final NormalDistribution STANDARD_NORMAL = new NormalDistribution(0.0, 1.0);
+    private static final NormalDistribution STANDARD_NORMAL = NormalDistribution.of(0.0, 1.0);
     
     // Constants for numerical stability
     private static final double LOG_EPSILON = 1e-15;

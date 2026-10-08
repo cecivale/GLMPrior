@@ -5,13 +5,14 @@ import beast.base.inference.distribution.ParametricDistribution;
 import beast.base.inference.parameter.RealParameter;
 import beast.base.inference.parameter.BooleanParameter;
 
-import org.apache.commons.math.distribution.ContinuousDistribution;
-import org.apache.commons.math.distribution.Distribution;
-import org.apache.commons.math.distribution.IntegerDistribution;
-import org.apache.commons.math.distribution.NormalDistributionImpl;
-import org.apache.commons.math.distribution.PoissonDistributionImpl;
-import org.apache.commons.math.distribution.GammaDistributionImpl;
-import org.apache.commons.math.distribution.BinomialDistributionImpl;
+import org.apache.commons.statistics.distribution.BinomialDistribution;
+import org.apache.commons.statistics.distribution.ContinuousDistribution;
+import org.apache.commons.statistics.distribution.DiscreteDistribution;
+import org.apache.commons.statistics.distribution.GammaDistribution;
+import org.apache.commons.statistics.distribution.NormalDistribution;
+import org.apache.commons.statistics.distribution.PoissonDistribution;
+
+
 
 /**
  * A generalized GLM-driven parametric distribution that supports multiple distribution families
@@ -46,6 +47,15 @@ public class GLMDistribution extends ParametricDistribution {
 
     // Cached values
     private final int p; // number of predictors
+
+    /** No-arg constructor required for JPMS service loading; not for programmatic use. */
+    public GLMDistribution() {
+        this.baselineValue = null; this.coefficients = null; this.predictorValues = null;
+        this.indicators = null; this.family = null; this.link = null;
+        this.sigma = null; this.sigma2 = null; this.nTrials = null; this.shape = null;
+        this.p = 0;
+    }
+
 
     /**
      * Programmatic constructor for creating GLMDistribution instances.
@@ -177,7 +187,7 @@ public class GLMDistribution extends ParametricDistribution {
      *         logDensity() for evaluations that must not throw during MCMC.
      */
     @Override
-    public Distribution getDistribution() {
+    public Object getDistribution() {
         double mu = computeMean();
         if (Double.isNaN(mu)) {
             throw new IllegalStateException(family.getDisplayName() + " GLM with " + link.getDisplayName() +
@@ -186,38 +196,38 @@ public class GLMDistribution extends ParametricDistribution {
         return getDistribution(mu);
     }
 
-    private Distribution getDistribution(double mu) {
+    private Object getDistribution(double mu) {
         switch (family) {
             case NORMAL:
                 double sigmaValue = getSigmaValue();
-                return new NormalDistributionImpl(mu, sigmaValue);
+                return NormalDistribution.of(mu, sigmaValue);
 
             case POISSON:
-                return new PoissonDistributionImpl(mu);
+                return PoissonDistribution.of(mu);
 
             case BINOMIAL:
                 int n = (int) Math.round(nTrials.getValue());
                 // For binomial, mu is the probability p
-                return new BinomialDistributionImpl(n, mu);
+                return BinomialDistribution.of(n, mu);
 
             case GAMMA:
                 double shapeValue = shape.getValue();
                 double rate = shapeValue / mu; // rate = shape / mean
-                return new GammaDistributionImpl(shapeValue, 1.0 / rate); // Commons Math uses scale = 1/rate
+                return GammaDistribution.of(shapeValue, 1.0 / rate); // Commons Math uses scale = 1/rate
 
             case LOGNORMAL:
                 // LogNormal doesn't have a direct Commons Math impl in the old package.
                 // Return a Normal distribution on the log scale for compatibility,
                 // but logDensity() should be used for proper calculations.
                 double logMu = computeLinearPredictor(); // eta = log-scale mean
-                return new NormalDistributionImpl(logMu, getSigmaValue());
+                return NormalDistribution.of(logMu, getSigmaValue());
 
             case LOGITNORMAL:
                 // LogitNormal doesn't have a Commons Math impl.
                 // Return a Normal distribution on the logit scale for compatibility,
                 // but logDensity() should be used for proper calculations.
                 double logitMu = computeLinearPredictor(); // eta = logit-scale mean
-                return new NormalDistributionImpl(logitMu, getSigmaValue());
+                return NormalDistribution.of(logitMu, getSigmaValue());
 
             default:
                 throw new IllegalStateException("Distribution creation not implemented for " + family);
@@ -248,12 +258,12 @@ public class GLMDistribution extends ParametricDistribution {
             return Double.NEGATIVE_INFINITY;
         }
 
-        Distribution dist = getDistribution(mu);
-        if (dist instanceof ContinuousDistribution) {
-            return ((ContinuousDistribution) dist).logDensity(y);
+        Object dist = getDistribution(mu);
+        if (dist instanceof ContinuousDistribution cd) {
+            return cd.logDensity(y);
         }
-        if (dist instanceof IntegerDistribution) {
-            double probability = ((IntegerDistribution) dist).probability(y);
+        if (dist instanceof DiscreteDistribution dd) {
+            double probability = dd.probability((int) Math.round(y));
             return probability > 0 ? Math.log(probability) : Double.NEGATIVE_INFINITY;
         }
         return Double.NEGATIVE_INFINITY;

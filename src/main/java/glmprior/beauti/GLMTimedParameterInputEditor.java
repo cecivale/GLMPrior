@@ -48,6 +48,9 @@ public class GLMTimedParameterInputEditor extends InputEditor.Base {
     Label value;
     Boolean isScalar = false;
 
+    public GLMTimedParameterInputEditor() {
+        super();
+    }
     public GLMTimedParameterInputEditor(BeautiDoc doc) {
         super(doc);
     }
@@ -593,7 +596,7 @@ public class GLMTimedParameterInputEditor extends InputEditor.Base {
         int nTypes = timedParameter.typeSetInput.get().getNTypes();
         int nEpochs = timedParameter.timesInput.get() == null
                 ? 0
-                : timedParameter.timesInput.get().getDimension();
+                : timedParameter.timesInput.get().size();
 
         System.out.println("Number of epochs: " + nEpochs);
 

@@ -1,18 +1,12 @@
 package glmprior.util;
 
 import beast.base.core.Description;
-import beast.base.core.Function;
 import beast.base.core.Input;
 import beast.base.core.Input.Validate;
 import beast.base.inference.distribution.ParametricDistribution;
 import beast.base.inference.parameter.RealParameter;
 
-// Use Apache Commons Math for CDF/ICDF like many BEAST distributions do
-import org.apache.commons.math.distribution.ContinuousDistribution;
-import org.apache.commons.math.distribution.Distribution;
-import org.apache.commons.math.distribution.NormalDistributionImpl;
-import org.apache.commons.math3.distribution.NormalDistribution;
-import org.apache.commons.math3.distribution.RealDistribution;
+import org.apache.commons.statistics.distribution.NormalDistribution;
 
 /**
  * A Normal parametric distribution whose mean is a fixed-time GLM:
@@ -95,13 +89,11 @@ public class GLMNormalDistribution extends ParametricDistribution {
         return mu;
     }
 
-    /** REQUIRED by ParametricDistribution: supply the current Commons-Math distribution. */
     @Override
-    public ContinuousDistribution getDistribution() {
+    public Object getDistribution() {
         final double mu    = currentMean();
         final double sigma = sigmaInput.get().getValue();
-        // ParametricDistribution will call density/CDF/ICDF on this object.
-        return new NormalDistributionImpl(mu, sigma);
+        return NormalDistribution.of(mu, sigma);
     }
 
     // Convenience accessors other BEAST utilities sometimes use.

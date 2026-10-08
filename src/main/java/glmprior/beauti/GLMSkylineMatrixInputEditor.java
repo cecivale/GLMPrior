@@ -26,7 +26,9 @@ public class GLMSkylineMatrixInputEditor extends GLMSkylineInputEditor {
 
     GLMSkylineMatrixParameter skylineMatrix;
 
-
+    public GLMSkylineMatrixInputEditor() {
+        super();
+    }
     public GLMSkylineMatrixInputEditor(BeautiDoc doc) {
         super(doc);
     }
@@ -73,7 +75,7 @@ public class GLMSkylineMatrixInputEditor extends GLMSkylineInputEditor {
         int nTypes = skylineParameter.typeSetInput.get().getNTypes();
         int nEpochs = skylineParameter.changeTimesInput.get() == null
                 ? 1
-                : skylineParameter.changeTimesInput.get().getDimension() + 1;
+                : skylineParameter.changeTimesInput.get().size() + 1;
         // TODO here is an error when going back and forth between GLM and normal param
         boolean b = skylineParameter.skylineValuesInput.get() instanceof GLMPrior;
 
@@ -122,7 +124,7 @@ public class GLMSkylineMatrixInputEditor extends GLMSkylineInputEditor {
         GLMPrior valuesParameter = (GLMPrior) skylineMatrix.skylineValuesInput.get();
         int nChanges = skylineParameter.changeTimesInput.get() == null
                 ? 0
-                : skylineParameter.changeTimesInput.get().getDimension();
+                : skylineParameter.changeTimesInput.get().size();
         int nTypes = skylineParameter.typeSetInput.get().getNTypes();
         int nPredictors = valuesParameter.predictorsInput.get().size();
 
