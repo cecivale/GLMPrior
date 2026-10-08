@@ -58,7 +58,7 @@ public class GLMNormalPriorDecoratorEditor extends ParametricDistributionInputEd
         build.setOnAction(e -> {
             try {
                 FileChooser fc = new FileChooser();
-                fc.setTitle("Load time-varying predictors (P × T)");
+                fc.setTitle("Load time-varying predictors (P x T)");
                 fc.getExtensionFilters().addAll(
                         new FileChooser.ExtensionFilter("CSV/TSV", "*.csv", "*.tsv", "*.txt"),
                         new FileChooser.ExtensionFilter("All files", "*.*"));
@@ -105,7 +105,7 @@ public class GLMNormalPriorDecoratorEditor extends ParametricDistributionInputEd
                 int baseIdx = Math.max(0, priorsList.indexOf(prior));
 
                 // ===== t = 0 : REUSE the existing row =====
-                // predictors X_0 (extract column 0 from P × T matrix)
+                // predictors X_0 (extract column 0 from P x T matrix)
                 RealParameter X0 = new RealParameter();
                 X0.setID(x.getID() + ".X_t0");
                 X0.isEstimatedInput.setValue(false, X0);
@@ -130,7 +130,7 @@ public class GLMNormalPriorDecoratorEditor extends ParametricDistributionInputEd
                 s0.countInput.setValue(1, s0);
                 doc.registerPlugin(s0);
 
-                // Update existing Prior row’s x & distr (no getInput(), use listInputs)
+                // Update existing Prior row's x & distr (no getInput(), use listInputs)
                 prior.m_x.setValue(s0, prior);
                 prior.distInput.setValue(glm, prior);
 
@@ -254,7 +254,7 @@ public class GLMNormalPriorDecoratorEditor extends ParametricDistributionInputEd
         throw new IllegalStateException("Could not find parent distribution list for prior " + prior.getID());
     }
 
-    /** Extract column t from P × T matrix (returns array of length P). */
+    /** Extract column t from P x T matrix (returns array of length P). */
     private static double[] extractColumn(Matrix matrix, int colIndex) {
         double[] column = new double[matrix.rows];
         for (int p = 0; p < matrix.rows; p++) {
@@ -311,7 +311,7 @@ public class GLMNormalPriorDecoratorEditor extends ParametricDistributionInputEd
 
 
 
-        // If none of the above exist on your build, you can later fall back to the “put them under posterior” approach.
+        // If none of the above exist on your build, you can later fall back to the "put them under posterior" approach.
     }
 
 
@@ -323,7 +323,7 @@ public class GLMNormalPriorDecoratorEditor extends ParametricDistributionInputEd
             return (Node) ed; // InputEditor is a Node in FX
         } catch (Exception e) {
             // fall back: show a tiny error label instead of crashing the panel
-            return new Label("⛔ " + childInput.getName() + ": " + e.getMessage());
+            return new Label("ERROR: " + childInput.getName() + ": " + e.getMessage());
         }
     }
 

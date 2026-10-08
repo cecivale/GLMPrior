@@ -4,12 +4,10 @@ import beast.base.core.Description;
 import beast.base.core.Input;
 import beast.base.core.Input.Validate;
 import beast.base.inference.Operator;
-import beast.base.inference.parameter.IntegerParameter;
 import beast.base.inference.parameter.RealParameter;
-import beast.base.util.Randomizer;
 import glmprior.util.MultiGLMDistribution;
 
-import java.text.DecimalFormat;
+
 
 /**
  * A joint operator that updates both GLM coefficients and the dependent parameter
@@ -17,12 +15,12 @@ import java.text.DecimalFormat;
  *
  * This operator solves the problem of poor mixing when the parameter y is tightly
  * constrained by the GLM prior (e.g., Normal with small sigma). By updating both
- * the coefficient and y together, it maintains y ≈ μ where μ = g^(-1)(α + Σ(β*X)).
+ * the coefficient and y together, it maintains y ~= mu where mu = g^(-1)(alpha + sum(beta*X)).
  *
  * The coupling is deterministic and reversible:
- *   - Propose Δβ for coefficient β[i]
- *   - Compute induced change in means: Δμ[j] = μ_new[j] - μ_old[j]
- *   - Update parameter: y[j] := y[j] + Δμ[j]
+ *   - Propose delta_beta for coefficient beta[i]
+ *   - Compute induced change in means: delta_mu[j] = mu_new[j] - mu_old[j]
+ *   - Update parameter: y[j] := y[j] + delta_mu[j]
  *
  * This maintains proper MCMC reversibility (Hastings ratio = 1.0) and dramatically
  * improves acceptance rates when sigma is small.
@@ -100,8 +98,10 @@ public class GLMJointParameterOperator extends Operator {
             double deltaMu = newMeans[i] - oldMeans[i];
             double newParamValue = oldParams[i] + deltaMu;
 
-            // Check bounds
-            if (newParamValue < parameter.getLower() || newParamValue > parameter.getUpper()) {
+            // Reject if either GLM state has no valid mean (NaN would otherwise pass the
+            // bounds check below and be written into the parameter), or if out of bounds
+            if (Double.isNaN(newParamValue)
+                    || newParamValue < parameter.getLower() || newParamValue > parameter.getUpper()) {
                 // Revert all parameter changes made so far
                 for (int j = 0; j < i; j++) {
                     parameter.setValue(j, oldParams[j]);

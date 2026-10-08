@@ -7,40 +7,61 @@ package glmprior.util;
 public enum DistributionFamily {
     /**
      * Normal (Gaussian) distribution.
-     * Domain: μ ∈ ℝ
+     * Domain: real numbers
      * Canonical link: Identity
-     * Additional parameters: σ (standard deviation)
-     */
-    NORMAL("Normal", "μ ∈ ℝ", "σ > 0"),
+     * Additional parameters: sigma (standard deviation)
+ */
+    NORMAL("Normal", "mu: (-inf, inf)", "sigma > 0"),
     
     /**
      * Poisson distribution.
-     * Domain: λ > 0
+     * Domain: lambda > 0
      * Canonical link: Log
      * Additional parameters: none
      */
-    POISSON("Poisson", "λ > 0", "none"),
+    POISSON("Poisson", "lambda > 0", "none"),
     
     /**
      * Binomial distribution.
-     * Domain: p ∈ [0,1]
+     * Domain: p in [0,1]
      * Canonical link: Logit
      * Additional parameters: n (number of trials)
      */
-    BINOMIAL("Binomial", "p ∈ [0,1]", "n ≥ 1 (trials)"),
+    BINOMIAL("Binomial", "p in [0,1]", "n >= 1 (trials)"),
     
     /**
      * Gamma distribution.
-     * Domain: μ > 0
+     * Domain: mu > 0
      * Canonical link: Inverse
      * Additional parameters: shape parameter
      */
-    GAMMA("Gamma", "μ > 0", "shape > 0"),
-    
+    GAMMA("Gamma", "mu > 0", "shape > 0"),
+
     /**
-     * Note: Additional distribution families like Inverse Gaussian and Negative Binomial
-     * can be added in the future with custom implementations.
-     */;
+     * Log-Normal distribution.
+     * Domain: mu > 0 (the mean of the underlying normal is log(mu))
+     * Canonical link: Log (since we model log(Y) ~ Normal)
+     * Additional parameters: sigma (standard deviation on log scale)
+     *
+     * This models: log(Y) ~ Normal(eta, sigma) where eta is the linear predictor.
+     * Equivalently: Y ~ LogNormal(eta, sigma)
+     *
+     * This matches the error structure in GLMPrior when using log link with error terms.
+     */
+    LOGNORMAL("LogNormal", "mu > 0", "sigma > 0 (on log scale)"),
+
+    /**
+     * Logit-Normal distribution.
+     * Domain: mu in (0, 1) (the mean of the underlying normal is logit(mu))
+     * Canonical link: Logit (since we model logit(Y) ~ Normal)
+     * Additional parameters: sigma (standard deviation on logit scale)
+     *
+     * This models: logit(Y) ~ Normal(eta, sigma) where eta is the linear predictor.
+     * The output Y is constrained to (0, 1).
+     *
+     * This matches the error structure in GLMPrior when using logit link with error terms.
+     */
+    LOGITNORMAL("LogitNormal", "mu in (0,1)", "sigma > 0 (on logit scale)");
     
     private final String displayName;
     private final String domain;
@@ -68,66 +89,63 @@ public enum DistributionFamily {
      * Returns the canonical link function for this distribution family.
      */
     public LinkFunction getCanonicalLink() {
-        switch (this) {
-            case NORMAL:
-                return LinkFunction.IDENTITY;
-            case POISSON:
-                return LinkFunction.LOG;
-            case BINOMIAL:
-                return LinkFunction.LOGIT;
-            case GAMMA:
-                return LinkFunction.INVERSE;
-            default:
-                throw new IllegalStateException("No canonical link defined for " + this);
-        }
+        return switch (this) {
+            case NORMAL -> LinkFunction.IDENTITY;
+            case POISSON -> LinkFunction.LOG;
+            case BINOMIAL -> LinkFunction.LOGIT;
+            case GAMMA -> LinkFunction.INVERSE;
+            case LOGNORMAL -> LinkFunction.LOG;
+            case LOGITNORMAL -> LinkFunction.LOGIT;
+            default -> throw new IllegalStateException("No canonical link defined for " + this);
+        };
     }
     
     /**
      * Returns true if the given link function is valid for this distribution family.
      */
     public boolean isValidLink(LinkFunction link) {
-        switch (this) {
-            case NORMAL:
-                return link == LinkFunction.IDENTITY || link == LinkFunction.LOG;
-            case POISSON:
-                return link == LinkFunction.LOG || link == LinkFunction.IDENTITY || link == LinkFunction.SQRT;
-            case BINOMIAL:
-                return link == LinkFunction.LOGIT || link == LinkFunction.PROBIT || link == LinkFunction.IDENTITY;
-            case GAMMA:
-                return link == LinkFunction.INVERSE || link == LinkFunction.LOG || link == LinkFunction.IDENTITY;
-            default:
-                return false;
-        }
+        return switch (this) {
+            case NORMAL -> link == LinkFunction.IDENTITY || link == LinkFunction.LOG;
+            case POISSON -> link == LinkFunction.LOG || link == LinkFunction.IDENTITY || link == LinkFunction.SQRT;
+            case BINOMIAL -> link == LinkFunction.LOGIT || link == LinkFunction.PROBIT || link == LinkFunction.IDENTITY;
+            case GAMMA -> link == LinkFunction.INVERSE || link == LinkFunction.LOG || link == LinkFunction.IDENTITY;
+            case LOGNORMAL ->
+                // LogNormal naturally uses log link (models log(Y) ~ Normal)
+                // Identity link would mean Y ~ LogNormal(mu, sigma) directly
+                    link == LinkFunction.LOG || link == LinkFunction.IDENTITY;
+            case LOGITNORMAL ->
+                // LogitNormal naturally uses logit link (models logit(Y) ~ Normal)
+                // Identity link would mean Y ~ LogitNormal(mu, sigma) directly
+                    link == LinkFunction.LOGIT || link == LinkFunction.IDENTITY;
+            default -> false;
+        };
     }
     
     /**
-     * Validates that the mean parameter μ is in the valid domain for this distribution family.
+     * Returns true if the mean parameter mu is finite and inside the valid domain for this family.
+     */
+    public boolean isValidMean(double mu) {
+        if (!Double.isFinite(mu)) {
+            return false;
+        }
+        return switch (this) {
+            case NORMAL -> true;                        // mu in (-inf, inf)
+            case POISSON, GAMMA, LOGNORMAL -> mu > 0.0;                    // mu > 0
+            case BINOMIAL -> mu >= 0.0 && mu <= 1.0;      // probability in [0,1]
+            case LOGITNORMAL -> mu > 0.0 && mu < 1.0;        // logit undefined at 0 and 1
+            default -> false;
+        };
+    }
+
+    /**
+     * Validates that the mean parameter mu is in the valid domain for this distribution family.
      * @param mu the mean parameter to validate
-     * @throws IllegalArgumentException if μ is outside the valid domain
+     * @throws IllegalArgumentException if mu is outside the valid domain
      */
     public void validateMean(double mu) {
-        switch (this) {
-            case NORMAL:
-                // μ ∈ ℝ - no constraints
-                if (!Double.isFinite(mu)) {
-                    throw new IllegalArgumentException("Normal distribution mean must be finite, got: " + mu);
-                }
-                break;
-            case POISSON:
-            case GAMMA:
-                // μ > 0
-                if (mu <= 0.0 || !Double.isFinite(mu)) {
-                    throw new IllegalArgumentException(getDisplayName() + " distribution mean must be > 0, got: " + mu);
-                }
-                break;
-            case BINOMIAL:
-                // μ ∈ [0,1] (interpreted as probability p)
-                if (mu < 0.0 || mu > 1.0 || !Double.isFinite(mu)) {
-                    throw new IllegalArgumentException("Binomial distribution probability must be in [0,1], got: " + mu);
-                }
-                break;
-            default:
-                throw new IllegalStateException("Domain validation not implemented for " + this);
+        if (!isValidMean(mu)) {
+            throw new IllegalArgumentException(getDisplayName() + " distribution mean must be in " +
+                    getDomain() + ", got: " + mu);
         }
     }
 }

@@ -12,20 +12,20 @@ public class QuickLinkTest {
         try {
             // Test 1: Link function round-trip
             testLinkFunctionRoundTrip();
-            System.out.println("✓ Link function round-trip tests passed");
+            System.out.println("[OK] Link function round-trip tests passed");
             
             // Test 2: Distribution family validation
             testDistributionFamilyValidation();
-            System.out.println("✓ Distribution family validation tests passed");
+            System.out.println("[OK] Distribution family validation tests passed");
             
             // Test 3: Edge cases
             testEdgeCases();
-            System.out.println("✓ Edge case tests passed");
+            System.out.println("[OK] Edge case tests passed");
             
-            System.out.println("\n🎉 All core GLM framework tests passed!");
+            System.out.println("\nAll core GLM framework tests passed!");
             
         } catch (Exception e) {
-            System.err.println("❌ Test failed: " + e.getMessage());
+            System.err.println("[FAIL] Test failed: " + e.getMessage());
             e.printStackTrace();
         }
     }

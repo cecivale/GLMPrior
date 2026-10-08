@@ -17,12 +17,12 @@ import java.text.DecimalFormat;
  *
  * This operator solves the problem of poor mixing when the parameter y is tightly
  * constrained by the GLM prior (e.g., Normal with small sigma). By updating both
- * the coefficient and y together, it maintains y ≈ μ where μ = g^(-1)(α + Σ(β*X)).
+ * the coefficient and y together, it maintains y ~= mu where mu = g^(-1)(alpha + sum(beta*X)).
  *
  * The coupling is deterministic and reversible:
- *   - Propose Δβ for coefficient β[i]
- *   - Compute induced change in means: Δμ[j] = μ_new[j] - μ_old[j]
- *   - Update parameter: y[j] := y[j] + Δμ[j]
+ *   - Propose delta_beta for coefficient beta[i]
+ *   - Compute induced change in means: delta_mu[j] = mu_new[j] - mu_old[j]
+ *   - Update parameter: y[j] := y[j] + delta_mu[j]
  *
  * This maintains proper MCMC reversibility (Hastings ratio = 1.0) and dramatically
  * improves acceptance rates when sigma is small.
@@ -173,7 +173,7 @@ public class GLMJointCoefficientParameterOperator extends Operator {
         double[] newMeans = glmDistribution.getAllMeans();
 
         // Adjust parameter values deterministically to track mean changes
-        if (!updateParameterDeterministically(parameter, oldMeans, newMeans)) {
+        if (updateParameterDeterministically(parameter, oldMeans, newMeans)) {
             // Revert coefficient if parameter update failed
             coefficients.setValue(coeffIndex, oldCoeff);
             return false;
@@ -221,7 +221,7 @@ public class GLMJointCoefficientParameterOperator extends Operator {
         double[] newMeans = glmDistribution.getAllMeans();
 
         // Adjust parameter values deterministically
-        if (!updateParameterDeterministically(parameter, oldMeans, newMeans)) {
+        if (updateParameterDeterministically(parameter, oldMeans, newMeans)) {
             // Revert all coefficients
             for (int i = 0; i < coefficients.getDimension(); i++) {
                 coefficients.setValue(i, oldCoeffs[i]);
@@ -254,19 +254,21 @@ public class GLMJointCoefficientParameterOperator extends Operator {
             double deltaMu = newMeans[i] - oldMeans[i];
             double newParamValue = oldParams[i] + deltaMu;
 
-            // Check bounds
-            if (newParamValue < parameter.getLower() || newParamValue > parameter.getUpper()) {
+            // Reject if either GLM state has no valid mean (NaN would otherwise pass the
+            // bounds check below and be written into the parameter), or if out of bounds
+            if (Double.isNaN(newParamValue)
+                    || newParamValue < parameter.getLower() || newParamValue > parameter.getUpper()) {
                 // Revert all parameter changes made so far
                 for (int j = 0; j < i; j++) {
                     parameter.setValue(j, oldParams[j]);
                 }
-                return false;
+                return true;
             }
 
             parameter.setValue(i, newParamValue);
         }
 
-        return true;
+        return false;
     }
 
     @Override
