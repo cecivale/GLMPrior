@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://cecivale.github.io/GLMPrior/installation/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Installation - GLMPrior</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Installation";
+        var mkdocs_page_input_path = "installation.md";
+        var mkdocs_page_url = "/GLMPrior/installation/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> GLMPrior
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Introduction</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Installation</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#from-beauti">From BEAUti</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#by-hand">By Hand</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#building-from-source-code">Building from Source Code</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../setup/">Setting Up Analyses</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../citation_license/">Citation and License</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">GLMPrior</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Installation</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="installation">Installation</h1>
+<p>GLMPrior depends on the following BEAST2 packages:</p>
+<ul>
+<li><a href="https://github.com/tgvaughan/BDMM-Prime">BDMM-Prime</a></li>
+<li><a href="https://github.com/tgvaughan/feast">feast</a></li>
+</ul>
+<p>When you install through BEAUti or build from source they will be downloaded automatically. When installing by hand, keep in mind to install the above packages first. </p>
+<h2 id="from-beauti">From BEAUti</h2>
+<ol>
+<li>Launch BEAUti.</li>
+<li>Select <code>File -&gt; Manage packages</code>.</li>
+<li>In the new window at the bottom menu, select <code>Package repositories</code>.</li>
+<li>Click <code>Add URL</code>, paste the link <a href="https://raw.githubusercontent.com/cecivale/GLMPrior/refs/heads/main/package.xml">https://raw.githubusercontent.com/cecivale/GLMPrior/refs/heads/main/package.xml</a> and click <code>OK</code>.</li>
+<li>Now close the Package Repository Manager window. You should now see GLMPrior package listed among the other packages.</li>
+<li>Select the GLMPrior package and click <code>Install\Upgrade</code>.</li>
+<li>In order to use the combined BDMM-Prime and GLMPrior template you will need to restart BEAUti.</li>
+</ol>
+<h2 id="by-hand">By Hand</h2>
+<p>Download the ZIP from the <a href="https://github.com/cecivale/GLMPrior/releases">GLMPrior GitHub releases</a>, then unzip and install following the instructions in <a href="https://www.beast2.org/managing-packages/#:~:text=If%20for%20some%20reason%20you,zip%20inside%20the%20VSS%20directory">BEAST2 Package Management</a>.  </p>
+<p>Currently, to use the BEAUti interface of GLMPrior with BDMM-Prime, you need to manually clear the BEAUti class path after manual installation of GLMPrior package. To do so:
+1. Launch BEAUti
+2. Select <code>File -&gt; Clear class path</code>
+3. Restart BEAUti and you should now be able to use combined GLM and BDMM-Prime template.</p>
+<h2 id="building-from-source-code">Building from Source Code</h2>
+<p>The below information is largely copied from <a href="https://github.com/tgvaughan/BDMM-Prime">BDMM-Prime repo</a>.</p>
+<p>To build GLMPrior from source you'll need the following to be installed:
+- OpenJDK version 17 or greater
+- A recent version of OpenJFX
+- the Apache Ant build system</p>
+<p>Once these are installed and in your execution path, issue the following
+command from the root directory of this repository:</p>
+<pre><code class="language-sh">JAVA_FX_HOME=/path/to/openjfx/ ant
+</code></pre>
+<p>The package archive will be left in the <code>dist/</code> subdirectory.</p>
+<p>Note that unless you already have a local copy of the latest
+<a href="https://github.com/CompEvol/beast2">BEAST 2 source</a>
+in the directory <code>../beast2</code> and the latest
+<a href="https://github.com/CompEvol/beastfx">BeastFX source</a>
+in the directory <code>../beastfx</code> relative to the GLMPrior root, the build
+script will attempt to download them automatically. Also, other BEAST2 
+packages that GLMPrior depends on will be downloaded. Thus, most builds
+will require a network connection.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href=".." class="btn btn-neutral float-left" title="Introduction"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../setup/" class="btn btn-neutral float-right" title="Setting Up Analyses">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href=".." style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../setup/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

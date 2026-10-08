@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://cecivale.github.io/GLMPrior/GLMPrior_vs_GLMDistribution/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>GLMPrior vs MultiGLMDistribution: Equivalence Guide - GLMPrior</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "GLMPrior vs MultiGLMDistribution: Equivalence Guide";
+        var mkdocs_page_input_path = "GLMPrior_vs_GLMDistribution.md";
+        var mkdocs_page_url = "/GLMPrior/GLMPrior_vs_GLMDistribution/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> GLMPrior
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Introduction</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../installation/">Installation</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../setup/">Setting Up Analyses</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../citation_license/">Citation and License</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">GLMPrior</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">GLMPrior vs MultiGLMDistribution: Equivalence Guide</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="glmprior-vs-multiglmdistribution-equivalence-guide">GLMPrior vs MultiGLMDistribution: Equivalence Guide</h1>
+<p>This document explains how to configure <code>GLMPrior</code> and <code>MultiGLMDistribution</code> to achieve equivalent models, and provides guidance on when to use each approach.</p>
+<h2 id="overview">Overview</h2>
+<ul>
+<li><strong>GLMPrior</strong>: A <code>Function</code> that computes parameter values directly using a GLM formula. The output is deterministic given the GLM parameters.</li>
+<li><strong>MultiGLMDistribution</strong>: A <code>ParametricDistribution</code> that defines a probability distribution whose mean is determined by a GLM. Used as a prior on estimated parameters.</li>
+</ul>
+<h2 id="equivalence-table">Equivalence Table</h2>
+<h3 id="with-error-terms-probabilistic-models">With Error Terms (Probabilistic Models)</h3>
+<p>For GLMPrior with error terms to be equivalent to MultiGLMDistribution, use the following mappings:</p>
+<table>
+<thead>
+<tr>
+<th>GLMPrior Config</th>
+<th>MultiGLMDistribution Config</th>
+<th>Mathematical Model</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>linkFunction="log"</code> + <code>error</code></td>
+<td><code>family="LOGNORMAL"</code> <code>link="LOG"</code></td>
+<td>log(Y) ~ Normal(η, σ)</td>
+</tr>
+<tr>
+<td><code>linkFunction="identity"</code> + <code>error</code></td>
+<td><code>family="NORMAL"</code> <code>link="IDENTITY"</code></td>
+<td>Y ~ Normal(η, σ)</td>
+</tr>
+<tr>
+<td><code>linkFunction="logit"</code> + <code>error</code></td>
+<td><code>family="LOGITNORMAL"</code> <code>link="LOGIT"</code></td>
+<td>logit(Y) ~ Normal(η, σ)</td>
+</tr>
+</tbody>
+</table>
+<p>Where η = g(baseline) + β·X is the linear predictor.</p>
+<h3 id="without-error-terms-deterministic">Without Error Terms (Deterministic)</h3>
+<table>
+<thead>
+<tr>
+<th>GLMPrior Config</th>
+<th>MultiGLMDistribution Equivalent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>linkFunction="log"</code>, no error</td>
+<td><strong>Not applicable</strong> - use GLMPrior directly</td>
+</tr>
+<tr>
+<td><code>linkFunction="identity"</code>, no error</td>
+<td><strong>Not applicable</strong> - use GLMPrior directly</td>
+</tr>
+<tr>
+<td><code>linkFunction="logit"</code>, no error</td>
+<td><strong>Not applicable</strong> - use GLMPrior directly</td>
+</tr>
+</tbody>
+</table>
+<p>GLMPrior without error terms is a deterministic function. There is no equivalent distribution-based representation.</p>
+<h2 id="parameter-mapping">Parameter Mapping</h2>
+<table>
+<thead>
+<tr>
+<th>GLMPrior Parameter</th>
+<th>MultiGLMDistribution Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>baselineValue</code></td>
+<td><code>baselineValue</code></td>
+<td>Value on response scale when all predictors are 0</td>
+</tr>
+<tr>
+<td><code>coefficients</code></td>
+<td><code>coefficients</code></td>
+<td>GLM coefficients (β)</td>
+</tr>
+<tr>
+<td><code>indicators</code></td>
+<td><code>indicators</code></td>
+<td>Binary indicators for variable selection</td>
+</tr>
+<tr>
+<td><code>error</code> prior: Normal(0, σ)</td>
+<td><code>sigma</code></td>
+<td>Standard deviation on link scale</td>
+</tr>
+<tr>
+<td><code>predictor</code></td>
+<td><code>predictor</code></td>
+<td>Predictor functions</td>
+</tr>
+<tr>
+<td><code>logTransform</code></td>
+<td><code>logTransform</code></td>
+<td>Apply log(x+1) transform to predictors</td>
+</tr>
+<tr>
+<td><code>standardize</code></td>
+<td><code>standardize</code></td>
+<td>Standardize predictors to mean=0, sd=1</td>
+</tr>
+</tbody>
+</table>
+<h2 id="xml-configuration-examples">XML Configuration Examples</h2>
+<h3 id="example-1-log-link-with-error-rates-positive-values">Example 1: Log Link with Error (Rates, Positive Values)</h3>
+<p><strong>GLMPrior setup:</strong></p>
+<pre><code class="language-xml">&lt;!-- GLMPrior computes values directly --&gt;
+&lt;skylineValues id=&quot;samplingRate&quot; spec=&quot;glmprior.util.GLMPrior&quot;
+               linkFunction=&quot;log&quot;
+               logTransform=&quot;true&quot;
+               standardize=&quot;true&quot;&gt;
+    &lt;predictor spec=&quot;RealParameterFromLabelledXSV&quot; .../&gt;
+    &lt;parameter id=&quot;coefficients&quot; spec=&quot;RealParameter&quot; name=&quot;coefficients&quot; value=&quot;0.1&quot;/&gt;
+    &lt;parameter id=&quot;baseline&quot; spec=&quot;RealParameter&quot; name=&quot;baselineValue&quot; value=&quot;0.1&quot;/&gt;
+    &lt;parameter id=&quot;indicators&quot; spec=&quot;BooleanParameter&quot; name=&quot;indicators&quot; value=&quot;1&quot;/&gt;
+    &lt;parameter id=&quot;errorTerms&quot; spec=&quot;RealParameter&quot; name=&quot;error&quot; value=&quot;0.0&quot; dimension=&quot;8&quot;/&gt;
+&lt;/skylineValues&gt;
+
+&lt;!-- Prior on error terms --&gt;
+&lt;prior x=&quot;@errorTerms&quot;&gt;
+    &lt;Normal mean=&quot;0&quot; sigma=&quot;@error_sigma&quot;/&gt;
+&lt;/prior&gt;
+</code></pre>
+<p><strong>Equivalent MultiGLMDistribution setup:</strong></p>
+<pre><code class="language-xml">&lt;!-- samplingRate is a free parameter --&gt;
+&lt;parameter id=&quot;samplingRate&quot; spec=&quot;RealParameter&quot; dimension=&quot;8&quot; value=&quot;0.1&quot;/&gt;
+
+&lt;!-- GLM prior on samplingRate --&gt;
+&lt;prior x=&quot;@samplingRate&quot;&gt;
+    &lt;distr spec=&quot;glmprior.util.MultiGLMDistribution&quot;
+           family=&quot;LOGNORMAL&quot;
+           link=&quot;LOG&quot;
+           logTransform=&quot;true&quot;
+           standardize=&quot;true&quot;
+           baselineValue=&quot;@baseline&quot;
+           coefficients=&quot;@coefficients&quot;
+           indicators=&quot;@indicators&quot;
+           sigma=&quot;@error_sigma&quot;&gt;
+        &lt;predictor spec=&quot;RealParameterFromLabelledXSV&quot; .../&gt;
+    &lt;/distr&gt;
+&lt;/prior&gt;
+</code></pre>
+<h3 id="example-2-logit-link-with-error-probabilities">Example 2: Logit Link with Error (Probabilities)</h3>
+<p><strong>GLMPrior setup:</strong></p>
+<pre><code class="language-xml">&lt;skylineValues id=&quot;probability&quot; spec=&quot;glmprior.util.GLMPrior&quot;
+               linkFunction=&quot;logit&quot;
+               logTransform=&quot;true&quot;
+               standardize=&quot;true&quot;&gt;
+    &lt;predictor .../&gt;
+    &lt;parameter id=&quot;coefficients&quot; name=&quot;coefficients&quot; .../&gt;
+    &lt;parameter id=&quot;baseline&quot; name=&quot;baselineValue&quot; value=&quot;0.5&quot;/&gt;  &lt;!-- probability scale --&gt;
+    &lt;parameter id=&quot;indicators&quot; name=&quot;indicators&quot; .../&gt;
+    &lt;parameter id=&quot;errorTerms&quot; name=&quot;error&quot; dimension=&quot;8&quot;/&gt;
+&lt;/skylineValues&gt;
+
+&lt;prior x=&quot;@errorTerms&quot;&gt;
+    &lt;Normal mean=&quot;0&quot; sigma=&quot;@error_sigma&quot;/&gt;
+&lt;/prior&gt;
+</code></pre>
+<p><strong>Equivalent MultiGLMDistribution setup:</strong></p>
+<pre><code class="language-xml">&lt;parameter id=&quot;probability&quot; spec=&quot;RealParameter&quot; dimension=&quot;8&quot; value=&quot;0.5&quot; lower=&quot;0&quot; upper=&quot;1&quot;/&gt;
+
+&lt;prior x=&quot;@probability&quot;&gt;
+    &lt;distr spec=&quot;glmprior.util.MultiGLMDistribution&quot;
+           family=&quot;LOGITNORMAL&quot;
+           link=&quot;LOGIT&quot;
+           logTransform=&quot;true&quot;
+           standardize=&quot;true&quot;
+           baselineValue=&quot;@baseline&quot;
+           coefficients=&quot;@coefficients&quot;
+           indicators=&quot;@indicators&quot;
+           sigma=&quot;@error_sigma&quot;&gt;
+        &lt;predictor .../&gt;
+    &lt;/distr&gt;
+&lt;/prior&gt;
+</code></pre>
+<h3 id="example-3-identity-link-with-error-unbounded-values">Example 3: Identity Link with Error (Unbounded Values)</h3>
+<p><strong>GLMPrior setup:</strong></p>
+<pre><code class="language-xml">&lt;skylineValues id=&quot;value&quot; spec=&quot;glmprior.util.GLMPrior&quot;
+               linkFunction=&quot;identity&quot;&gt;
+    &lt;predictor .../&gt;
+    &lt;parameter id=&quot;coefficients&quot; name=&quot;coefficients&quot; .../&gt;
+    &lt;parameter id=&quot;baseline&quot; name=&quot;baselineValue&quot; value=&quot;1.0&quot;/&gt;
+    &lt;parameter id=&quot;indicators&quot; name=&quot;indicators&quot; .../&gt;
+    &lt;parameter id=&quot;errorTerms&quot; name=&quot;error&quot; dimension=&quot;8&quot;/&gt;
+&lt;/skylineValues&gt;
+
+&lt;prior x=&quot;@errorTerms&quot;&gt;
+    &lt;Normal mean=&quot;0&quot; sigma=&quot;@error_sigma&quot;/&gt;
+&lt;/prior&gt;
+</code></pre>
+<p><strong>Equivalent MultiGLMDistribution setup:</strong></p>
+<pre><code class="language-xml">&lt;parameter id=&quot;value&quot; spec=&quot;RealParameter&quot; dimension=&quot;8&quot; value=&quot;1.0&quot;/&gt;
+
+&lt;prior x=&quot;@value&quot;&gt;
+    &lt;distr spec=&quot;glmprior.util.MultiGLMDistribution&quot;
+           family=&quot;NORMAL&quot;
+           link=&quot;IDENTITY&quot;
+           baselineValue=&quot;@baseline&quot;
+           coefficients=&quot;@coefficients&quot;
+           indicators=&quot;@indicators&quot;
+           sigma=&quot;@error_sigma&quot;&gt;
+        &lt;predictor .../&gt;
+    &lt;/distr&gt;
+&lt;/prior&gt;
+</code></pre>
+<h2 id="when-to-use-each-approach">When to Use Each Approach</h2>
+<h3 id="use-glmprior-when">Use GLMPrior When:</h3>
+<ol>
+<li>
+<p><strong>Deterministic relationships</strong>: You want the parameter values to be exactly determined by the GLM formula without additional noise.</p>
+</li>
+<li>
+<p><strong>Direct computation</strong>: The GLM output is used directly as a model parameter (e.g., sampling rate in a birth-death model).</p>
+</li>
+<li>
+<p><strong>Explicit error terms</strong>: You want to estimate individual error terms for each dimension, allowing per-dimension deviations from the GLM prediction.</p>
+</li>
+<li>
+<p><strong>Simpler model structure</strong>: Fewer parameters when error terms are not needed.</p>
+</li>
+</ol>
+<h3 id="use-multiglmdistribution-when">Use MultiGLMDistribution When:</h3>
+<ol>
+<li>
+<p><strong>Standard prior specification</strong>: You want to specify a prior distribution on a parameter, where the mean of the prior follows a GLM.</p>
+</li>
+<li>
+<p><strong>Shared variance</strong>: All dimensions share the same error variance (σ), rather than having individual error terms.</p>
+</li>
+<li>
+<p><strong>Familiar GLM framework</strong>: The distribution-based approach is more aligned with standard GLM theory.</p>
+</li>
+<li>
+<p><strong>Integration with BEAST priors</strong>: Fits naturally into BEAST's prior specification framework.</p>
+</li>
+</ol>
+<h2 id="error-structure-comparison">Error Structure Comparison</h2>
+<table>
+<thead>
+<tr>
+<th>Link Function</th>
+<th>Error Location</th>
+<th>GLMPrior Formula</th>
+<th>Distribution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>log</td>
+<td>Log scale (multiplicative)</td>
+<td>Y = baseline × exp(β·X + ε)</td>
+<td>LogNormal</td>
+</tr>
+<tr>
+<td>identity</td>
+<td>Original scale (additive)</td>
+<td>Y = baseline + β·X + ε</td>
+<td>Normal</td>
+</tr>
+<tr>
+<td>logit</td>
+<td>Logit scale</td>
+<td>Y = logit⁻¹(logit(baseline) + β·X + ε)</td>
+<td>LogitNormal</td>
+</tr>
+</tbody>
+</table>
+<h3 id="why-link-scale-error">Why Link-Scale Error?</h3>
+<p>Putting error on the link scale (as GLMPrior does) has important properties:</p>
+<ul>
+<li>
+<p><strong>Log link</strong>: Error is multiplicative on the original scale. This is appropriate when you expect constant coefficient of variation (CV), common for rates and concentrations.</p>
+</li>
+<li>
+<p><strong>Logit link</strong>: Error is on the log-odds scale. The output is automatically constrained to (0, 1), appropriate for probabilities.</p>
+</li>
+<li>
+<p><strong>Identity link</strong>: Error is additive, appropriate for unbounded continuous variables.</p>
+</li>
+</ul>
+<h2 id="distribution-family-summary">Distribution Family Summary</h2>
+<table>
+<thead>
+<tr>
+<th>Family</th>
+<th>Domain</th>
+<th>Canonical Link</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NORMAL</td>
+<td>(-∞, +∞)</td>
+<td>identity</td>
+<td>Unbounded continuous data</td>
+</tr>
+<tr>
+<td>LOGNORMAL</td>
+<td>(0, +∞)</td>
+<td>log</td>
+<td>Positive continuous data (rates, concentrations)</td>
+</tr>
+<tr>
+<td>LOGITNORMAL</td>
+<td>(0, 1)</td>
+<td>logit</td>
+<td>Proportions, probabilities</td>
+</tr>
+<tr>
+<td>POISSON</td>
+<td>{0, 1, 2, ...}</td>
+<td>log</td>
+<td>Count data</td>
+</tr>
+<tr>
+<td>BINOMIAL</td>
+<td>{0, ..., n}</td>
+<td>logit</td>
+<td>Binary/binomial outcomes</td>
+</tr>
+<tr>
+<td>GAMMA</td>
+<td>(0, +∞)</td>
+<td>inverse</td>
+<td>Positive continuous with right skew</td>
+</tr>
+</tbody>
+</table>
+<h2 id="important-notes">Important Notes</h2>
+<ol>
+<li>
+<p><strong>Initial values must match</strong>: For equivalent results, ensure initial values of baseline, coefficients, indicators, and the target parameter are consistent between the two approaches.</p>
+</li>
+<li>
+<p><strong>Predictor transformations</strong>: Always set <code>logTransform</code> and <code>standardize</code> identically in both approaches.</p>
+</li>
+<li>
+<p><strong>Dimension consistency</strong>: Ensure the dimension of the target parameter matches the dimension of the predictors.</p>
+</li>
+<li>
+<p><strong>Sigma interpretation</strong>: In both approaches, sigma represents standard deviation on the link scale (log scale for LOGNORMAL, logit scale for LOGITNORMAL).</p>
+</li>
+</ol>
+<h2 id="mathematical-details">Mathematical Details</h2>
+<p>In all cases, the linear predictor is:</p>
+<pre><code>η = g(baselineValue) + Σ(βⱼ × Xⱼ × γⱼ)
+</code></pre>
+<p>where g() is the link function, βⱼ are coefficients, Xⱼ are predictors, and γⱼ are indicators.</p>
+<hr />
+<h3 id="normal-family">NORMAL Family</h3>
+<p><strong>Model</strong>: Y ~ Normal(μ, σ)</p>
+<p><strong>Link functions</strong>:
+- Identity (canonical): μ = η
+- Log: μ = exp(η)</p>
+<p><strong>Properties</strong>:
+- Mean: E[Y] = μ
+- Variance: Var(Y) = σ²
+- Domain: Y ∈ (-∞, +∞)</p>
+<p><strong>Use case</strong>: Unbounded continuous data with additive error structure.</p>
+<p><strong>GLMPrior equivalent</strong>: <code>linkFunction="identity"</code> with error terms.</p>
+<hr />
+<h3 id="lognormal-family">LOGNORMAL Family</h3>
+<p><strong>Model</strong>: log(Y) ~ Normal(η, σ), equivalently Y ~ LogNormal(η, σ)</p>
+<p><strong>Link functions</strong>:
+- Log (canonical): η = log(baselineValue) + β·X
+- Identity: η = baselineValue + β·X (less common)</p>
+<p><strong>Properties</strong>:
+- Median: exp(η)
+- Mean: E[Y] = exp(η + σ²/2)
+- Variance: Var(Y) = (exp(σ²) - 1) × exp(2η + σ²)
+- Domain: Y ∈ (0, +∞)
+- Error is multiplicative on original scale</p>
+<p><strong>Use case</strong>: Positive continuous data (rates, concentrations) where coefficient of variation is approximately constant.</p>
+<p><strong>GLMPrior equivalent</strong>: <code>linkFunction="log"</code> with error terms.</p>
+<hr />
+<h3 id="logitnormal-family">LOGITNORMAL Family</h3>
+<p><strong>Model</strong>: logit(Y) ~ Normal(η, σ), where logit(y) = log(y/(1-y))</p>
+<p><strong>Link functions</strong>:
+- Logit (canonical): η = logit(baselineValue) + β·X
+- Identity: η = baselineValue + β·X (less common)</p>
+<p><strong>Properties</strong>:
+- Mode ≈ logit⁻¹(η) for small σ
+- Mean: No closed form (requires numerical integration)
+- Variance: Approximated using delta method: Var(Y) ≈ [μ(1-μ)]² × σ²
+- Domain: Y ∈ (0, 1)
+- Error is on log-odds scale</p>
+<p><strong>Use case</strong>: Proportions or probabilities with overdispersion or individual-level variation.</p>
+<p><strong>GLMPrior equivalent</strong>: <code>linkFunction="logit"</code> with error terms.</p>
+<hr />
+<h3 id="poisson-family">POISSON Family</h3>
+<p><strong>Model</strong>: Y ~ Poisson(λ) where λ = μ</p>
+<p><strong>Link functions</strong>:
+- Log (canonical): μ = exp(η)
+- Identity: μ = η
+- Sqrt: μ = η²</p>
+<p><strong>Properties</strong>:
+- Mean: E[Y] = μ
+- Variance: Var(Y) = μ (variance equals mean)
+- Domain: Y ∈ {0, 1, 2, ...}</p>
+<p><strong>Use case</strong>: Count data where variance approximately equals mean.</p>
+<p><strong>Note</strong>: Poisson does not model error on the link scale like GLMPrior. It assumes the variance-mean relationship inherent to the Poisson distribution. Not directly equivalent to GLMPrior with error terms.</p>
+<hr />
+<h3 id="binomial-family">BINOMIAL Family</h3>
+<p><strong>Model</strong>: Y ~ Binomial(n, p) where p = μ</p>
+<p><strong>Link functions</strong>:
+- Logit (canonical): μ = logit⁻¹(η) = 1/(1 + exp(-η))
+- Probit: μ = Φ(η) where Φ is the standard normal CDF
+- Identity: μ = η (only valid if η ∈ [0,1])</p>
+<p><strong>Properties</strong>:
+- Mean: E[Y] = n × p
+- Variance: Var(Y) = n × p × (1 - p)
+- Domain: Y ∈ {0, 1, ..., n}
+- Requires <code>nTrials</code> parameter</p>
+<p><strong>Use case</strong>: Binary outcomes or counts out of a fixed number of trials.</p>
+<p><strong>Note</strong>: Binomial does not model error on the link scale. For overdispersed proportions, use LOGITNORMAL instead.</p>
+<hr />
+<h3 id="gamma-family">GAMMA Family</h3>
+<p><strong>Model</strong>: Y ~ Gamma(shape, rate) where rate = shape/μ</p>
+<p><strong>Link functions</strong>:
+- Inverse (canonical): μ = 1/η
+- Log: μ = exp(η)
+- Identity: μ = η</p>
+<p><strong>Properties</strong>:
+- Mean: E[Y] = μ
+- Variance: Var(Y) = μ²/shape (coefficient of variation is constant)
+- Domain: Y ∈ (0, +∞)
+- Requires <code>shape</code> parameter</p>
+<p><strong>Use case</strong>: Positive continuous data with right skew, where variance is proportional to the square of the mean.</p>
+<p><strong>Note</strong>: Gamma models a specific variance-mean relationship. For multiplicative error with normal distribution on log scale, use LOGNORMAL instead.</p>
+<hr />
+<h2 id="glmprior-error-equivalence-summary">GLMPrior Error Equivalence Summary</h2>
+<p>GLMPrior with <code>error ~ Normal(0, σ)</code> is equivalent to:</p>
+<table>
+<thead>
+<tr>
+<th>Link Function</th>
+<th>Equivalent Family</th>
+<th>Model</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>log</code></td>
+<td>LOGNORMAL</td>
+<td>log(Y) ~ Normal(η, σ)</td>
+</tr>
+<tr>
+<td><code>identity</code></td>
+<td>NORMAL</td>
+<td>Y ~ Normal(η, σ)</td>
+</tr>
+<tr>
+<td><code>logit</code></td>
+<td>LOGITNORMAL</td>
+<td>logit(Y) ~ Normal(η, σ)</td>
+</tr>
+</tbody>
+</table>
+<p>Where η = g(baselineValue) + β·X is the linear predictor.</p>
+<p><strong>Important</strong>: POISSON, BINOMIAL, and GAMMA families model specific variance-mean relationships from their respective distributions. They are NOT equivalent to GLMPrior with error terms, which assumes normal error on the link scale.</p>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
